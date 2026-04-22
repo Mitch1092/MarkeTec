@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Nueva publicación</h1>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <input name="title" placeholder="Título"><br><br>
+
+    <textarea name="content" placeholder="Contenido"></textarea><br><br>
+
+    <input type="file" name="image" accept="image/*"><br><br>
+
+    <img id="preview" width="200" style="display:none;"><br>
+
+    <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <input name="title" placeholder="Título"><br><br>
+
+    <textarea name="content"></textarea><br><br>
+
+    <!-- 🔥 multiple -->
+    <input type="file" name="images" multiple accept="image/*"><br><br>
+
+    <div id="preview-container"></div>
+
+    <button>Publicar</button>
+</form>
+
+<script>
+// 👀 preview múltiple
+document.querySelector('input[name="images"]').onchange = function() {
+    const container = document.getElementById('preview-container');
+    container.innerHTML = '';
+
+    [...this.files].forEach(file => {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        img.width = 120;
+        container.appendChild(img);
+    });
+};
+</script>
+
+</body>
+</html>

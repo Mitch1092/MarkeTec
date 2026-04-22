@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inicio</title>
+    <style>
+        body { font-family: Arial; background: #f5f5f5; }
+        .post { background: white; padding: 10px; margin: 10px; }
+    </style>
+</head>
+<body>
+
+<h1>Feed</h1>
+
+<a href="/create/">Crear publicación</a>
+
+{% for post in posts %}
+<div class="post">
+    <h3>{{ post.title }}</h3>
+    <p>{{ post.content }}</p>
+
+    {% if post.image %}
+        <img src="{{ post.image.url }}" width="300">
+    {% endif %}
+
+    <p>Por: {{ post.author.username }}</p>
+</div>
+{% endfor %}
+
+<style>
+.carousel {
+    position: relative;
+    width: 300px;
+}
+
+.carousel img {
+    width: 100%;
+    display: none;
+}
+
+.carousel img.active {
+    display: block;
+}
+
+button {
+    margin: 5px;
+}
+</style>
+
+{% for post in posts %}
+<div class="post">
+    <h3>{{ post.title }}</h3>
+    <p>{{ post.content }}</p>
+
+    {% if post.images.all %}
+    <div class="carousel" id="carousel-{{ post.id }}">
+        {% for img in post.images.all %}
+            <img src="{{ img.image.url }}" class="{% if forloop.first %}active{% endif %}">
+        {% endfor %}
+
+        <button onclick="prev({{ post.id }})">⬅</button>
+        <button onclick="next({{ post.id }})">➡</button>
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+
+<script>
+function next(id) {
+    const imgs = document.querySelectorAll(`#carousel-${id} img`);
+    let index = [...imgs].findIndex(img => img.classList.contains('active'));
+
+    imgs[index].classList.remove('active');
+    imgs[(index + 1) % imgs.length].classList.add('active');
+}
+
+function prev(id) {
+    const imgs = document.querySelectorAll(`#carousel-${id} img`);
+    let index = [...imgs].findIndex(img => img.classList.contains('active'));
+
+    imgs[index].classList.remove('active');
+    imgs[(index - 1 + imgs.length) % imgs.length].classList.add('active');
+}
+</script>
+
+</body>
+</html>
