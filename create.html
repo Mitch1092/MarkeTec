@@ -12,7 +12,17 @@
     <label>Título:</label><br>
     <input type="text" required><br><br>
 
-    <label>Contenido:</label><br>
+    <label>Tipo de publicación:</label><br>
+    <label>Venta</label>
+    <input type="checkbox" id="switch" />
+    <label for="switch">Compra</label><br><br>
+    <!--poner un switch-->
+
+    <label>Imágenes</label><br>
+    <input type="file" name="images" multiple accept="image/*"><br><br>
+    <div id="preview-container"></div><br><br>
+
+    <label>Descripción:</label><br>
     <textarea rows="5" cols="40" required></textarea><br><br>
 
     <button type="submit">Publicar</button>

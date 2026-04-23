@@ -8,18 +8,42 @@
 
 <h1>Perfil de Usuario</h1>
 
+<img src="{{ profile_user.profile.avatar.url }}" width="150">
+
 <section>
     <p><strong>Nombre:</strong> UsuarioEjemplo</p>
     <p><strong>Email:</strong> usuario@email.com</p>
+    <button type="submit">Reportar</button>
 </section>
 
 <hr>
 
 <section>
-    <h2>Mis publicaciones</h2>
+    <h2>Publicaciones</h2>
 
     <article>
-        <p>Mi primera publicación</p>
+        <p>Publicación</p>
+    </article>
+
+</section>
+
+<section>
+    <h2>Agregar reseña</h3>
+    <form method="post">
+        <input type="hidden" name="review">
+        <textarea name="comment"></textarea>
+        <input type="number" name="rating" min="1" max="5">
+        <button>Enviar</button>
+    </form>
+
+
+    <h2>Reseñas</h2>
+
+    <article>
+        <h3>Usuario</h3>
+        <h4>fecha</h4>
+        <p>Reseña</p>
+
     </article>
 
 </section>
