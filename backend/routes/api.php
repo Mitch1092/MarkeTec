@@ -1,0 +1,43 @@
+<?php
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\ImageController;
+use App\Http\Controllers\AuthController;
+
+/*
+|--------------------------------------------------------------------------
+| Public routes (auth not required)
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+/*
+|--------------------------------------------------------------------------
+| Protected routes (Sanctum)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::get('/me', [AuthController::class, 'me']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Posts protegidos
+    Route::apiResource('posts', PostController::class);
+
+    Route::apiResource('users', UserController::class);
+    Route::apiResource('reports', ReportController::class);
+    Route::apiResource('reviews', ReviewController::class);
+    Route::apiResource('images', ImageController::class);
+
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+});
