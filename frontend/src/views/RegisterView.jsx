@@ -3,7 +3,10 @@ import client from "../api/client";
 
 export default function RegisterView() {
   const handleRegister = async (data) => {
-    await client.post("/users", data);
+    const res = await client.post("/register", data);
+
+    localStorage.setItem("token", res.data.token);
+
     alert("Usuario creado");
   };
 

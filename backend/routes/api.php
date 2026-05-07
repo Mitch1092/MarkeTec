@@ -17,7 +17,8 @@ use App\Http\Controllers\AuthController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-
+Route::get('/posts/{post}', [PostController::class, 'show']);
+Route::get('/users/{user}', [UserController::class, 'show']);
 /*
 |--------------------------------------------------------------------------
 | Protected routes (Sanctum)
@@ -37,7 +38,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('reviews', ReviewController::class);
     Route::apiResource('images', ImageController::class);
 
-    Route::get('/user', function (Request $request) {
-        return $request->user();
+    Route::get('/my-posts', function (Request $request) {
+    return $request->user()
+        ->posts()
+        ->with(['images', 'user'])
+        ->latest()
+        ->get();
     });
+    
 });

@@ -45,7 +45,9 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-         return response()->json($user, 200);
+        return response()->json(
+            $user->load('posts.images')
+        );
     }
 
     /**

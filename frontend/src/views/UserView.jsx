@@ -1,17 +1,24 @@
-import { useLoaderData } from "react-router-dom";
+import { useEffect, useState } from "react";
+import client from "../api/client";
+import PostGrid from "../components/PostGrid";
 
 export default function UserView() {
-  const users = useLoaderData();
+  const [posts, setPosts] = useState([]);
+
+  useEffect(() => {
+    const fetchMyPosts = async () => {
+      const res = await client.get("/my-posts");
+      setPosts(res.data);
+    };
+
+    fetchMyPosts();
+  }, []);
 
   return (
     <div>
-      <h1>Perfil / Usuarios</h1>
+      <h1>Mis posts</h1>
 
-      {users.map((user) => (
-        <div key={user.id}>
-          {user.name} - {user.email}
-        </div>
-      ))}
+      <PostGrid posts={posts} />
     </div>
   );
 }

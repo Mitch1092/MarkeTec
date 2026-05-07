@@ -16,6 +16,7 @@ return new class extends Migration
             $table->timestamps();
             $table->string('title');
             $table->string('description')->nullable();
+            $table->boolean('venta');
             $table->decimal('price', 10, 2)->nullable();
             $table->decimal('popularity', 10, 2)->default(0);
             $table->boolean('activa')->default(true);

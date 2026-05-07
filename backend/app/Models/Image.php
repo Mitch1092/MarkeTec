@@ -7,4 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Image extends Model
 {
     protected $fillable = ['path', 'post_id', 'report_id', 'review_id'];
+
+    public function post()
+    {
+        return $this->belongsTo(Post::class);
+    }
 }

@@ -6,17 +6,22 @@ import { useNavigate } from "react-router-dom";
 
 export default function SignInView() {
   const { login } = useAuth();
-  const navigate = useNavigate();
 
-  const handleLogin = async (data) => {
-    // 🔐 1. pedir CSRF cookie primero
-    await client.get("/sanctum/csrf-cookie");
+  const handleLogin = async (form) => {
+    await login(form); // 🔥 SOLO ESTO
+  };
 
-    // 🔐 2. login real
-    const res = await client.post("/api/login", data);
 
-    login(res.data);
-    navigate("/profile");
+  const logout = async () => {
+    await client.post("/logout");
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+  };
+
+  const getPosts = async () => {
+    const res = await client.get("/posts");
+    return res.data;
   };
 
   return <AuthForm type="login" onSubmit={handleLogin} />;

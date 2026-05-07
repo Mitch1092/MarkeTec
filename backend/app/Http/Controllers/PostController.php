@@ -14,29 +14,68 @@ class PostController extends Controller
      */
     public function index()
     {
-        return Post::all();
+        return Post::with('images')->get();
     }
 
     /**
      * Store a newly created resource in storage.
      */
+    // public function store(StorePostRequest $request){
+    //     // logger('STORE HIT');
+    //     // logger($request->all());
+    //     // logger($request->user());
+        
+    //     $post = $request->user()->posts()->create([
+    //         'title' => $request->title,
+    //         'description' => $request->description,
+    //         'venta' => filter_var($request->venta, FILTER_VALIDATE_BOOLEAN),
+    //         'price' => $request->venta ? $request->price : 0,
+    //     ]);
+
+    //     $images = $request->file('images', []);
+    //     foreach ($images as $img) {
+    //         $path = $img->store('images', 'public');
+
+    //             $post->images()->create([
+    //                 'path' => $path,
+    //             ]);
+    //     // if ($request->hasFile('images')) {
+    //     //     foreach ($request->file('images') as $img) {
+    //     //         $path = $img->store('images', 'public');
+
+    //     //         $post->images()->create([
+    //     //             'path' => $path,
+    //     //         ]);
+    //         }
+    //     // logger('STORE HIT');
+    //     // logger($request->all());
+    //     // logger($request->user());
+    //     // logger($request->all());
+    //     return response()->json($post->load('images'));
+    // }
+
+
     public function store(StorePostRequest $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|decimal:0,2|min:0',
-            
-        ]);
-        dd(Auth::id());
-        $post = Post::create([
+
+        $post = $request->user()->posts()->create([
             'title' => $request->title,
             'description' => $request->description,
-            'price' => $request->price,
-            'user_id' => Auth::id(),
+            'venta' => $request->boolean('venta'),
+            'price' => $request->boolean('venta') ? $request->price : 0,
         ]);
 
-        return response()->json($post, 201);
+        foreach ($request->file('images') ?? [] as $img) {
+            $path = $img->store('images', 'public');
+
+            $post->images()->create([
+                'path' => $path,
+            ]);
+        }
+
+
+
+        return response()->json($post->load('images'));
     }
 
     /**
@@ -44,7 +83,9 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-         return response()->json($post, 200);
+        return response()->json(
+            $post->load(['user', 'images'])
+        );
     }
 
     /**

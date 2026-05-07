@@ -19,7 +19,7 @@ class ImageController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreImageRequest $request)
     {
         $request->validate([
             'image' => 'required|image|max:2048',

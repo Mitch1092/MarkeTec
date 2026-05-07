@@ -19,17 +19,17 @@ import PostView from "./views/PostView";
 
 // LOADERS
 async function usersLoader() {
-  const res = await client.get("/api/users");
+  const res = await client.get("/users");
   return res.data;
 }
 
 async function postLoader({ params }) {
-  const res = await client.get(`/api/posts/${params.id}`);
+  const res = await client.get(`/posts/${params.id}`);
   return res.data;
 }
 
 async function publicUserLoader({ params }) {
-  const res = await client.get(`/api/users/${params.id}`);
+  const res = await client.get(`/users/${params.id}`);
   return res.data;
 }
 
@@ -67,13 +67,13 @@ export const router = createBrowserRouter([
       { path: "signin", element: <SignInView /> },
 
       {
-        path: "user/:id",
+        path: "users/:id",
         loader: publicUserLoader,
         element: <PublicUserView />,
       },
 
       {
-        path: "post/:id",
+        path: "posts/:id",
         loader: postLoader,
         element: <PostView />,
       },
