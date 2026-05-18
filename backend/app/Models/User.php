@@ -39,8 +39,13 @@ class User extends Authenticatable
         return $this->hasMany(Report::class);
     }
 
-    public function reviews(): HasMany
+    public function reviewsReceived()
     {
-        return $this->hasMany(Review::class);
+        return $this->hasMany(Review::class, 'reviewed_id');
+    }
+
+    public function reviewsWritten()
+    {
+        return $this->hasMany(Review::class, 'reviewer_id');
     }
 }

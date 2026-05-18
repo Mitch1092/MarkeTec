@@ -6,15 +6,19 @@ use Illuminate\Database\Eloquent\Model;
 
 class Review extends Model
 {
-    protected $fillable = [
-        'title', 
+    protected $fillable = [ 
         'description',
         'score',
     ];
 
-    public function user()
+    public function reviewed()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'reviewed_id');
+    }
+
+    public function reviewer()
+    {
+        return $this->belongsTo(User::class, 'reviewer_id');
     }
 
     public function images()

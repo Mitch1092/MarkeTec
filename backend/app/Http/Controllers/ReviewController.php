@@ -22,20 +22,33 @@ class ReviewController extends Controller
      */
     public function store(StoreReviewRequest $request)
     {
-        $review = $request->user()->reviews()->create([
-            'title' => $request->title,
+        $review = Review::create([
+            'reviewed_id' => $request->reviewed_id,
+            'reviewer_id' => $request->user()->id,
             'description' => $request->description,
-            'score' =>  $request->score,
+            'score' => $request->score,
         ]);
+
+        if ($request->user()->id == $request->reviewed_id) {
+            return response()->json([
+                'message' => 'No puedes reseñarte a ti mismo.'
+            ], 422);
+        }
 
         foreach ($request->file('images') ?? [] as $img) {
             $path = $img->store('images', 'public');
+
             $review->images()->create([
                 'path' => $path,
             ]);
         }
 
-        return response()->json($reviews->load('images'));
+        return response()->json($review->load([
+            'images',
+            'reviewer',
+        ]));
+
+        
     }
 
     /**
