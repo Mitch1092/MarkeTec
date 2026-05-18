@@ -91,16 +91,24 @@ export default function PostingView() {
       data.append("images[]", file);
     });
 
-    await client.post("/posts", data);
+    try {
+      await client.post("/posts", data);
 
-    alert("Post creado");
+      alert("Post creado");
 
-    setForm({
-      title: "",
-      description: "",
-      price: "",
-      images: [],
-    });
+      setForm({
+        title: "",
+        description: "",
+        price: "",
+        images: [],
+      });
+    } catch (error) {
+      console.error(error);
+      alert(
+        error.response?.data?.message ||
+        "Error al crear el post. Verifica el tamaño de las imágenes."
+      );
+    }
   };
 
   return (
