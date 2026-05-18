@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Models\Post;
+use App\Models\Report;
+use App\Models\Review;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -28,7 +30,17 @@ class User extends Authenticatable
     ];
 
     public function posts(): HasMany
-{
-    return $this->hasMany(Post::class);
-}
+    {
+        return $this->hasMany(Post::class);
+    }
+
+    public function reports(): HasMany
+    {
+        return $this->hasMany(Report::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
 }

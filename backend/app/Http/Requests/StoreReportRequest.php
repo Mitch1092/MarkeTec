@@ -23,7 +23,15 @@ class StoreReportRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'description' => 'nullable|string',
+            'images' => 'nullable|array',
+            'images.*' => 'image|max:8192',
         ];
+    }
+
+    protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
+    {
+        logger($validator->errors()->toArray());
+        parent::failedValidation($validator);
     }
 }

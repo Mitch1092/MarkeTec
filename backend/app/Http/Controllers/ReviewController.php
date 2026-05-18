@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreReviewRequest;
 use App\Http\Requests\UpdateReviewRequest;
 use App\Models\Review;
+use Illuminate\Support\Facades\Auth;
 
 class ReviewController extends Controller
 {
@@ -13,7 +14,7 @@ class ReviewController extends Controller
      */
     public function index()
     {
-        return Review::all();
+        return Review::with('images')->get();
     }
 
     /**
@@ -21,19 +22,20 @@ class ReviewController extends Controller
      */
     public function store(StoreReviewRequest $request)
     {
-         $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'score' => 'required|decimal',
-        ]);
-
-        $review = Review::create([
+        $review = $request->user()->reviews()->create([
             'title' => $request->title,
             'description' => $request->description,
-            'score' => $request->score,
+            'score' =>  $request->score,
         ]);
 
-        return response()->json($review, 201);
+        foreach ($request->file('images') ?? [] as $img) {
+            $path = $img->store('images', 'public');
+            $review->images()->create([
+                'path' => $path,
+            ]);
+        }
+
+        return response()->json($reviews->load('images'));
     }
 
     /**
@@ -41,7 +43,9 @@ class ReviewController extends Controller
      */
     public function show(Review $review)
     {
-         return response()->json($review, 200);
+        return response()->json(
+            $review->load(['user', 'images'])
+        );
     }
 
     /**

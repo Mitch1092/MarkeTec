@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreReportRequest;
 use App\Http\Requests\UpdateReportRequest;
 use App\Models\Report;
+use Illuminate\Support\Facades\Auth;
 
 class ReportController extends Controller
 {
@@ -13,7 +14,7 @@ class ReportController extends Controller
      */
     public function index()
     {
-        return Report::all();
+        return Report::with('images')->get();
     }
 
     /**
@@ -21,15 +22,18 @@ class ReportController extends Controller
      */
     public function store(StoreReportRequest $request)
     {
-         $request->validate([
-            'description' => 'required|string',
-        ]);
-
-        $report = Report::create([
+        $report = $request ->user()->reports()->create([
             'description' => $request->description,
         ]);
 
-        return response()->json($report, 201);
+        foreach ($request-file('images') ?? [] as $img) {
+            $path = $img->store('images', 'public');
+
+            $report->images()->create([
+                'path' => $path,
+            ]);
+        }
+        return response()->json($report->load('images'));
     }
 
     /**
@@ -37,7 +41,9 @@ class ReportController extends Controller
      */
     public function show(Report $report)
     {
-         return response()->json($report, 200);
+        return response()->json(
+            $report->load(['user', 'images'])
+        );
     }
 
     /**
