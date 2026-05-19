@@ -5,9 +5,11 @@ import UserCard from "../components/UserCard";
 import ReviewCard from "../components/ReviewCard";
 import ReportCard from "../components/ReportCard";
 import PostCard from "../components/PostCard";
+import ToggleAdmin from "../components/ToggleAdmin";
 
 export default function AdminView() {
   const [activeTab, setActiveTab] = useState("users");
+  const [showActive, setShowActive] = useState(true);
 
   const [users, setUsers] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -39,36 +41,51 @@ export default function AdminView() {
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
       const q = userSearch.toLowerCase();
-      return (
-        user.name?.toLowerCase().includes(q) ||
-        user.ncontrol?.toLowerCase().includes(q)
-      );
+      const matchesSearch = user.name?.toLowerCase().includes(q) || user.ncontrol?.toLowerCase().includes(q);
+      const matchesState = showActive ? user.activa : !user.activa;
+      return matchesSearch && matchesState;
     });
-  }, [users, userSearch]);
+  }, [users, userSearch, showActive]);
 
-  // DELETE HELPERS
-  const deleteUser = async (id) => {
-    if (!confirm("¿Eliminar este usuario?")) return;
-    await client.delete(`/users/${id}`);
-    setUsers(users.filter((u) => u.id !== id));
+  // TOGGLE HELPERS
+  const toggleUser = async (id, isActive) => {
+    if (isActive) {
+      if (!confirm("¿Desactivar este usuario?")) return;
+      await client.delete(`/users/${id}`);
+    } else {
+      await client.patch(`/users/${id}/reactivate`, { activa: true });
+    }
+    setUsers(users.map((u) => (u.id === id ? { ...u, activa: !isActive } : u)));
   };
 
-  const deleteReview = async (id) => {
-    if (!confirm("¿Eliminar esta reseña?")) return;
-    await client.delete(`/reviews/${id}`);
-    setReviews(reviews.filter((r) => r.id !== id));
+  const toggleReview = async (id, isActive) => {
+    if (isActive) {
+      if (!confirm("¿Desactivar esta reseña?")) return;
+      await client.delete(`/reviews/${id}`);
+    } else {
+      await client.patch(`/reviews/${id}/reactivate`, { activa: true });
+    }
+    setReviews(reviews.map((r) => (r.id === id ? { ...r, activa: !isActive } : r)));
   };
 
-  const deleteReport = async (id) => {
-    if (!confirm("¿Eliminar este reporte?")) return;
-    await client.delete(`/reports/${id}`);
-    setReports(reports.filter((r) => r.id !== id));
+  const toggleReport = async (id, isActive) => {
+    if (isActive) {
+      if (!confirm("¿Marcar este reporte como revisado (desactivar)?")) return;
+      await client.delete(`/reports/${id}`);
+    } else {
+      await client.patch(`/reports/${id}/reactivate`, { activa: true });
+    }
+    setReports(reports.map((r) => (r.id === id ? { ...r, activa: !isActive } : r)));
   };
 
-  const deletePost = async (id) => {
-    if (!confirm("¿Eliminar este post?")) return;
-    await client.delete(`/posts/${id}`);
-    setPosts(posts.filter((p) => p.id !== id));
+  const togglePost = async (id, isActive) => {
+    if (isActive) {
+      if (!confirm("¿Desactivar este post?")) return;
+      await client.delete(`/posts/${id}`);
+    } else {
+      await client.patch(`/posts/${id}/reactivate`, { activa: true });
+    }
+    setPosts(posts.map((p) => (p.id === id ? { ...p, activa: !isActive } : p)));
   };
 
   const tabButtonStyle = (tab) => ({
@@ -88,20 +105,27 @@ export default function AdminView() {
       {/* TABS */}
       <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
         <button onClick={() => setActiveTab("users")} style={tabButtonStyle("users")}>
-          Usuarios ({users.length})
+          Usuarios ({users.filter(u => showActive ? u.activa : !u.activa).length})
         </button>
 
         <button onClick={() => setActiveTab("reviews")} style={tabButtonStyle("reviews")}>
-          Reseñas ({reviews.length})
+          Reseñas ({reviews.filter(r => showActive ? r.activa : !r.activa).length})
         </button>
 
         <button onClick={() => setActiveTab("reports")} style={tabButtonStyle("reports")}>
-          Reportes ({reports.length})
+          Reportes ({reports.filter(r => showActive ? r.activa : !r.activa).length})
         </button>
 
         <button onClick={() => setActiveTab("posts")} style={tabButtonStyle("posts")}>
-          Posts ({posts.length})
+          Posts ({posts.filter(p => showActive ? p.activa : !p.activa).length})
         </button>
+      </div>
+
+      {/* 🎚️ SLIDER */}
+      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+        <span style={{ fontWeight: !showActive ? "bold" : "normal" }}></span>
+        <ToggleAdmin value={showActive} onChange={setShowActive} />
+        <span style={{ fontWeight: showActive ? "bold" : "normal" }}></span>
       </div>
 
       {/* USERS */}
@@ -130,8 +154,11 @@ export default function AdminView() {
               <div key={user.id} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 <UserCard user={user} />
 
-                <button onClick={() => deleteUser(user.id)} style={{ background: "#dc2626", color: "white", padding: "10px", borderRadius: "8px" }}>
-                  Eliminar usuario
+                <button
+                  onClick={() => toggleUser(user.id, user.activa)}
+                  style={{ background: user.activa ? "#dc2626" : "#16a34a", color: "white", padding: "10px", borderRadius: "8px", border: "none", cursor: "pointer" }}
+                >
+                  {user.activa ? "Desactivar usuario" : "Reactivar usuario"}
                 </button>
               </div>
             ))}
@@ -142,12 +169,15 @@ export default function AdminView() {
       {/* REVIEWS */}
       {activeTab === "reviews" && (
         <div style={{ display: "grid", gap: "20px" }}>
-          {reviews.map((review) => (
+          {reviews.filter(r => showActive ? r.activa : !r.activa).map((review) => (
             <div key={review.id} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               <ReviewCard review={review} />
 
-              <button onClick={() => deleteReview(review.id)} style={{ background: "#dc2626", color: "white", padding: "10px", borderRadius: "8px" }}>
-                Eliminar reseña
+              <button
+                onClick={() => toggleReview(review.id, review.activa)}
+                style={{ background: review.activa ? "#dc2626" : "#16a34a", color: "white", padding: "10px", borderRadius: "8px", border: "none", cursor: "pointer" }}
+              >
+                {review.activa ? "Desactivar reseña" : "Reactivar reseña"}
               </button>
             </div>
           ))}
@@ -157,12 +187,15 @@ export default function AdminView() {
       {/* REPORTS */}
       {activeTab === "reports" && (
         <div style={{ display: "grid", gap: "20px" }}>
-          {reports.map((report) => (
+          {reports.filter(r => showActive ? r.activa : !r.activa).map((report) => (
             <div key={report.id} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               <ReportCard report={report} />
 
-              <button onClick={() => deleteReport(report.id)} style={{ background: "#dc2626", color: "white", padding: "10px", borderRadius: "8px" }}>
-                Eliminar reporte
+              <button
+                onClick={() => toggleReport(report.id, report.activa)}
+                style={{ background: report.activa ? "#dc2626" : "#16a34a", color: "white", padding: "10px", borderRadius: "8px", border: "none", cursor: "pointer" }}
+              >
+                {report.activa ? "Marcar como revisado (Desactivar)" : "Reactivar reporte"}
               </button>
             </div>
           ))}
@@ -178,20 +211,15 @@ export default function AdminView() {
             gap: "20px",
           }}
         >
-          {posts.map((post) => (
+          {posts.filter(p => showActive ? p.activa : !p.activa).map((post) => (
             <div key={post.id} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               <PostCard post={post} />
 
               <button
-                onClick={() => deletePost(post.id)}
-                style={{
-                  background: "#dc2626",
-                  color: "white",
-                  padding: "10px",
-                  borderRadius: "8px",
-                }}
+                onClick={() => togglePost(post.id, post.activa)}
+                style={{ background: post.activa ? "#dc2626" : "#16a34a", color: "white", padding: "10px", borderRadius: "8px", border: "none", cursor: "pointer" }}
               >
-                Eliminar post
+                {post.activa ? "Desactivar post" : "Reactivar post"}
               </button>
             </div>
           ))}

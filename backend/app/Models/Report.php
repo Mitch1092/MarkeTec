@@ -10,6 +10,7 @@ class Report extends Model
         'description',
         'reported_id',
         'reporter_id',
+        'activa',
     ];
 
     public function reported()

@@ -32,10 +32,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Posts protegidos
     Route::apiResource('posts', PostController::class);
+    Route::patch('/posts/{post}/reactivate', [PostController::class, 'reactivate']);
 
     Route::apiResource('users', UserController::class);
+    Route::patch('/users/{user}/reactivate', [UserController::class, 'reactivate']);
+
     Route::apiResource('reports', ReportController::class);
+    Route::patch('/reports/{report}/reactivate', [ReportController::class, 'reactivate']);
+
     Route::apiResource('reviews', ReviewController::class);
+    Route::patch('/reviews/{review}/reactivate', [ReviewController::class, 'reactivate']);
+
     Route::apiResource('images', ImageController::class);
 
     Route::get('/my-posts', function (Request $request) {

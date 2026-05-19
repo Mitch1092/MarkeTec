@@ -79,10 +79,23 @@ class ReportController extends Controller
      */
     public function destroy(Report $report)
     {
-         $report->delete();
+        $report->update([
+            'activa' => false,
+        ]);
 
         return response()->json([
             'message' => 'Reporte eliminado'
+        ], 200);
+    }
+
+    public function reactivate(Report $report)
+    {
+        $report->update([
+            'activa' => true,
+        ]);
+
+        return response()->json([
+            'message' => 'Reporte reactivado'
         ], 200);
     }
 }

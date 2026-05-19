@@ -12,8 +12,11 @@ class ReviewController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
+        if ($request->user() && $request->user()->admin) {
+            return Review::withoutGlobalScope('activa')->with(['images', 'reviewer', 'reviewed'])->get();
+        }
         return Review::with(['images', 'reviewer', 'reviewed'])->get();
     }
 
@@ -54,8 +57,9 @@ class ReviewController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Review $review)
+    public function show($id)
     {
+        $review = Review::withoutGlobalScope('activa')->findOrFail($id);
         return response()->json(
             $review->load(['user', 'images'])
         );
@@ -104,14 +108,27 @@ class ReviewController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Review $review)
+    public function destroy($id)
     { 
-    $review->update([
-        'activa' => false,
-    ]);
+        $review = Review::withoutGlobalScope('activa')->findOrFail($id);
+        $review->update([
+            'activa' => false,
+        ]);
 
-    return response()->json([
-        'message' => 'Reseña eliminada',
-    ]);
+        return response()->json([
+            'message' => 'Reseña eliminada',
+        ]);
+    }
+
+    public function reactivate(\Illuminate\Http\Request $request, $id)
+    { 
+        $review = Review::withoutGlobalScope('activa')->findOrFail($id);
+        $review->update([
+            'activa' => $request->boolean('activa', true),
+        ]);
+
+        return response()->json([
+            'message' => 'Reseña reactivada',
+        ]);
     }
 }

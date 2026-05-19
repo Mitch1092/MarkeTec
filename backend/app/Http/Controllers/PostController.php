@@ -12,8 +12,11 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
+        if ($request->user() && $request->user()->admin) {
+            return Post::withoutGlobalScope('activa')->with('images')->get();
+        }
         return Post::with('images')->get();
     }
 
@@ -79,8 +82,9 @@ class PostController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Post $post)
+    public function show($id)
     {
+        $post = Post::withoutGlobalScope('activa')->findOrFail($id);
         return response()->json(
             $post->load(['user', 'images'])
         );
@@ -89,8 +93,9 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StorePostRequest $request, Post $post)
+    public function update(StorePostRequest $request, $id)
 {
+    $post = Post::withoutGlobalScope('activa')->findOrFail($id);
     $post->update([
         'title' => $request->title,
         'description' => $request->description,
@@ -122,14 +127,27 @@ class PostController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Post $post)
+    public function destroy($id)
     { 
-    $post->update([
-        'activa' => false,
-    ]);
+        $post = Post::withoutGlobalScope('activa')->findOrFail($id);
+        $post->update([
+            'activa' => false,
+        ]);
 
     return response()->json([
         'message' => 'Post eliminado',
     ]);
+    }
+
+    public function reactivate(\Illuminate\Http\Request $request, $id)
+    { 
+        $post = Post::withoutGlobalScope('activa')->findOrFail($id);
+        $post->update([
+            'activa' => true,
+        ]);
+
+        return response()->json([
+            'message' => 'Post reactivado',
+        ]);
     }
 }

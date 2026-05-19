@@ -81,12 +81,23 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     { 
-    $user->update([
-        'activa' => false,
-    ]);
+        $user->update([
+            'activa' => false,
+        ]);
 
-    return response()->json([
-        'message' => 'Usuario eliminado',
-    ]);
-}
+        return response()->json([
+            'message' => 'Usuario eliminado',
+        ]);
+    }
+
+    public function reactivate(User $user)
+    {
+        $user->update([
+            'activa' => true,
+        ]);
+
+        return response()->json([
+            'message' => 'Usuario reactivado',
+        ]);
+    }
 }
