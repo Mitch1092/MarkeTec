@@ -1,4 +1,5 @@
-// src/components/UserCard.jsx
+import { Link } from "react-router-dom";
+
 export default function UserCard({ user }) {
     // Calcular promedio de scores recibidos
     const reviews = user.reviews_received || [];
@@ -33,7 +34,13 @@ export default function UserCard({ user }) {
                     fontSize: "32px",
                 }}
             >
-                {user.name}
+                {/* USUARIO */}
+
+                Usuario:{" "}
+                <Link to={`/users/${user.id}`}>
+                    {user.name}
+                </Link>
+
             </h1>
 
             {/* Información */}
@@ -50,8 +57,7 @@ export default function UserCard({ user }) {
                 </p>
 
                 <p style={{ margin: 0 }}>
-                    <strong>Teléfono:</strong>{" "}
-                    {user.phone || "No disponible"}
+                    <strong>Teléfono:</strong> {user.phone || "No disponible"}
                 </p>
 
                 <p style={{ margin: 0 }}>
@@ -80,6 +86,28 @@ export default function UserCard({ user }) {
                     {reviews.length} reseña
                     {reviews.length !== 1 ? "s" : ""}
                 </p>
+
+                {user.phone && (
+                    <a
+                        href={`https://wa.me/52${user.phone.replace(/\D/g, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                            marginTop: "10px",
+                            display: "inline-block",
+                            background: "#25d366",
+                            color: "white",
+                            padding: "10px 20px",
+                            borderRadius: "8px",
+                            textDecoration: "none",
+                            fontWeight: "bold",
+                            textAlign: "center",
+                            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                        }}
+                    >
+                        💬 Contactar
+                    </a>
+                )}
             </div>
         </div>
     );

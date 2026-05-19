@@ -71,6 +71,17 @@ export default function PublicUserView() {
 
   const canReview = currentUser.id !== user.id;
 
+  const reviews = user.reviews_received || [];
+  const averageScore =
+      reviews.length > 0
+          ? (
+              reviews.reduce(
+                  (sum, review) => sum + Number(review.score),
+                  0
+              ) / reviews.length
+          ).toFixed(1)
+          : "Sin reseñas";
+
   return (
     <div
       style={{
@@ -93,6 +104,16 @@ export default function PublicUserView() {
         <div>
           <h1>{user.name}</h1>
           <p>{user.email}</p>
+          <p
+              style={{
+                  marginTop: "10px",
+                  fontSize: "18px",
+                  fontWeight: "bold",
+                  color: "#2563eb",
+              }}
+          >
+              ⭐ Calificación promedio: {averageScore}
+          </p>
         </div>
 
         {canReview && (

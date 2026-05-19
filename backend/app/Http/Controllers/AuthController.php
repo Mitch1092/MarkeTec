@@ -11,7 +11,7 @@ class AuthController extends Controller
 {
     public function login(Request $request)
 {
-    $user = User::where('email', $request->email)->first();
+    $user = User::where('email', $request->email)->with('reviewsReceived')->first();
 
     if (! $user || ! Hash::check($request->password, $user->password)) {
         return response()->json(['message' => 'Invalid credentials'], 401);
@@ -43,6 +43,8 @@ class AuthController extends Controller
         'password' => bcrypt($request->password),
     ]);
 
+    $user->load('reviewsReceived');
+
     $token = $user->createToken('api-token')->plainTextToken;
 
     return response()->json([
@@ -53,7 +55,7 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        return response()->json($request->user());
+        return response()->json($request->user()->load('reviewsReceived'));
     }
 
     public function logout(Request $request)

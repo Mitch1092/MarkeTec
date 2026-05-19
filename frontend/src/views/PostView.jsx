@@ -1,29 +1,33 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import client from "../api/client";
+import UserCard from "../components/UserCard";
 
 export default function PostView() {
   const { id } = useParams();
-  const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
-  const [post, setPost] = useState(null);
 
-  useEffect(() => {
-    loadPost();
-  }, []);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [post, setPost] = useState(null);
 
   useEffect(() => {
     loadPost();
     loadCurrentUser();
   }, [id]);
+
   const isOwner =
     currentUser &&
     post &&
     currentUser.id === post.user_id;
 
   const loadCurrentUser = async () => {
-    const res = await client.get("/me");
-    setCurrentUser(res.data);
+    try {
+      const res = await client.get("/me");
+      setCurrentUser(res.data);
+    } catch {
+      // Usuario no autenticado
+      setCurrentUser(null);
+    }
   };
 
   const loadPost = async () => {
@@ -31,7 +35,6 @@ export default function PostView() {
     setPost(res.data);
   };
 
-  if (!post) return <p>Cargando...</p>;
   const handleDelete = async () => {
     if (!confirm("¿Eliminar este post?")) return;
 
@@ -40,6 +43,9 @@ export default function PostView() {
     alert("Post eliminado");
     navigate("/");
   };
+
+  if (!post) return <p>Cargando...</p>;
+
   return (
     <div
       style={{
@@ -49,6 +55,7 @@ export default function PostView() {
     >
       <h1>{post.title}</h1>
 
+      {/* IMÁGENES */}
       <div
         style={{
           display: "grid",
@@ -56,7 +63,7 @@ export default function PostView() {
           gap: "15px",
         }}
       >
-        {post.images.map((img) => (
+        {post.images?.map((img) => (
           <img
             key={img.id}
             src={`http://localhost:8000/storage/${img.path}`}
@@ -69,27 +76,25 @@ export default function PostView() {
         ))}
       </div>
 
+      {/* DESCRIPCIÓN */}
       <p style={{ marginTop: "20px" }}>
         {post.description}
       </p>
 
+      {/* FECHA */}
       <p>
-        Creado:
-        {" "}
+        Creado:{" "}
         {new Date(post.created_at).toDateString()}
       </p>
 
-      <p>
-        Usuario:
-        {" "}
-        <Link to={`/users/${post.user.id}`}>
-          {post.user.name}
-        </Link>
-      </p>
 
+
+      {/* PRECIO SOLO SI ES VENTA */}
       {post.venta && (
         <h2>${post.price}</h2>
       )}
+
+      {/* BOTONES SI ES EL DUEÑO */}
       {isOwner && (
         <div
           style={{
@@ -117,7 +122,13 @@ export default function PostView() {
           </button>
         </div>
       )}
-    </div>
 
+      {/* USER CARD DEL AUTOR */}
+      <div style={{ marginTop: "40px" }}>
+        <h2>Información del usuario</h2>
+
+        <UserCard user={post.user} />
+      </div>
+    </div>
   );
 }

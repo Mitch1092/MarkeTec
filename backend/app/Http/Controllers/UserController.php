@@ -60,15 +60,22 @@ class UserController extends Controller
          $request->validate([
             'name' => 'sometimes|string|max:255',
             'email' => 'sometimes|email|unique:users,email,' . $user->id,
-            'ncontrol' => 'required|string|max:20|unique:users,ncontrol',
+            'ncontrol' => 'required|string|max:20|unique:users,ncontrol,' . $user->id,
             'phone' => 'required|string|max:10',
+            'current_password' => 'required|string',
             'password' => 'nullable|min:6'
         ]);
 
-        $data = $request->all();
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json(['message' => 'La contraseña actual es incorrecta.'], 403);
+        }
 
-        if (isset($data['password'])) {
+        $data = $request->except('current_password');
+
+        if (!empty($data['password'])) {
             $data['password'] = Hash::make($data['password']);
+        } else {
+            unset($data['password']);
         }
 
         $user->update($data);
