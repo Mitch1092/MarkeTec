@@ -89,31 +89,49 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePostRequest $request, Post $post)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|numeric|min:0'
-        ]);
+    public function update(StorePostRequest $request, Post $post)
+{
+    $post->update([
+        'title' => $request->title,
+        'description' => $request->description,
+        'venta' => $request->boolean('venta'),
+        'price' => $request->boolean('venta')
+            ? $request->price
+            : 0,
+    ]);
 
-        $data = $request->all();
-
-
-        $post->update($data);
-
-        return response()->json($post, 200);
+    $keptImages = $request->input('kept_images', []);
+        
+    $imagesToDelete = $post->images()->whereNotIn('id', $keptImages)->get();
+    foreach ($imagesToDelete as $img) {
+        \Illuminate\Support\Facades\Storage::disk('public')->delete($img->path);
+        $img->delete();
     }
+
+    foreach ($request->file('images') ?? [] as $img) {
+        $path = $img->store('images', 'public');
+
+        $post->images()->create([
+            'path' => $path,
+        ]);
+    }
+
+    return response()->json($post->load('images'));
+}
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Post $post)
     {
-         $post->delete();
+    $this->authorize('update', $post); // opcional
 
-        return response()->json([
-            'message' => 'Post eliminado'
-        ], 200);
+    $post->update([
+        'activa' => false,
+    ]);
+
+    return response()->json([
+        'message' => 'Post eliminado',
+    ]);
     }
 }

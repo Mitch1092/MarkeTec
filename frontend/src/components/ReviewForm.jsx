@@ -1,13 +1,27 @@
 // ReviewForm.jsx
-import { useState } from "react";
-import client from "../api/client";
 
-export default function ReviewForm({ reviewedId, onCreated }) {
+import client from "../api/client";
+import { useEffect, useState } from "react";
+
+export default function ReviewForm({ reviewedId,
+  existingReview = null,
+  onCreated, }) {
   const [form, setForm] = useState({
-    description: "",
-    score: 10,
-    images: [],
+    description: existingReview?.description || "",
+    score: existingReview?.score || 10,
+    images: existingReview?.images || [],
   });
+
+  useEffect(() => {
+    if (!existingReview) return;
+
+    setForm((prev) => ({
+      ...prev,
+      description: existingReview.description || "",
+      score: existingReview.score || 10,
+      images: existingReview.images || [],
+    }));
+  }, [existingReview]);
 
   // CAMBIAR CAMPOS DE TEXTO
   const handleChange = (e) => {
@@ -84,23 +98,31 @@ export default function ReviewForm({ reviewedId, onCreated }) {
     data.append("description", form.description);
     data.append("score", form.score);
 
-    form.images.forEach((file) => {
-      data.append("images[]", file);
+    form.images.forEach((fileOrImg) => {
+      if (fileOrImg.id) {
+        data.append("kept_images[]", fileOrImg.id);
+      } else {
+        data.append("images[]", fileOrImg);
+      }
     });
 
-    const res = await client.post("/reviews", data);
+    let res;
+
+    if (existingReview) {
+      // Laravel no acepta multipart/form-data con PUT directamente
+      data.append("_method", "PUT");
+
+      res = await client.post(
+        `/reviews/${existingReview.id}`,
+        data
+      );
+    } else {
+      res = await client.post("/reviews", data);
+    }
 
     if (onCreated) {
       onCreated(res.data);
     }
-
-    alert("Review enviada");
-
-    setForm({
-      description: "",
-      score: 10,
-      images: [],
-    });
   };
 
   return (
@@ -167,7 +189,7 @@ export default function ReviewForm({ reviewedId, onCreated }) {
             }}
           >
             <img
-              src={URL.createObjectURL(img)}
+              src={img.id ? `http://localhost:8000/storage/${img.path}` : URL.createObjectURL(img)}
               alt=""
               style={{
                 width: "100%",

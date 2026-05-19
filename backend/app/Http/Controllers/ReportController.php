@@ -22,18 +22,29 @@ class ReportController extends Controller
      */
     public function store(StoreReportRequest $request)
     {
-        $report = $request ->user()->reports()->create([
+        if ($request->user()->id == $request->reported_id) {
+            return response()->json([
+                'message' => 'No puedes reportarte a ti mismo.'
+            ], 422);
+        }
+
+        $report = Report::create([
+            'reported_id' => $request->reported_id,
+            'reporter_id' => $request->user()->id,
             'description' => $request->description,
         ]);
 
-        foreach ($request-file('images') ?? [] as $img) {
+        foreach ($request->file('images') ?? [] as $img) {
             $path = $img->store('images', 'public');
 
             $report->images()->create([
                 'path' => $path,
             ]);
         }
-        return response()->json($report->load('images'));
+        return response()->json($report->load([
+            'images',
+            'reporter',
+        ]));
     }
 
     /**

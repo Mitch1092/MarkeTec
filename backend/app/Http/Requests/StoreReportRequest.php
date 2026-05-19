@@ -23,6 +23,7 @@ class StoreReportRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'reported_id' => 'required|exists:users,id',
             'description' => 'nullable|string',
             'images' => 'nullable|array',
             'images.*' => 'image|max:8192',

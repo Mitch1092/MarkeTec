@@ -22,18 +22,18 @@ class ReviewController extends Controller
      */
     public function store(StoreReviewRequest $request)
     {
+        if ($request->user()->id == $request->reviewed_id) {
+            return response()->json([
+                'message' => 'No puedes reseñarte a ti mismo.'
+            ], 422);
+        }
+        
         $review = Review::create([
             'reviewed_id' => $request->reviewed_id,
             'reviewer_id' => $request->user()->id,
             'description' => $request->description,
             'score' => $request->score,
         ]);
-
-        if ($request->user()->id == $request->reviewed_id) {
-            return response()->json([
-                'message' => 'No puedes reseñarte a ti mismo.'
-            ], 422);
-        }
 
         foreach ($request->file('images') ?? [] as $img) {
             $path = $img->store('images', 'public');
@@ -67,17 +67,38 @@ class ReviewController extends Controller
     public function update(UpdateReviewRequest $request, Review $review)
     {
          $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'score' => 'required|decimal',
+            'description' => 'nullable|string',
+            'score' => 'required|numeric|min:1|max:10',
+            'images' => 'nullable|array',
+            'images.*' => 'image|max:8192',
+            'kept_images' => 'nullable|array',
+            'kept_images.*' => 'integer|exists:images,id',
         ]);
 
         $data = $request->all();
 
-
         $review->update($data);
 
-        return response()->json($review, 200);
+        $keptImages = $request->input('kept_images', []);
+        
+        $imagesToDelete = $review->images()->whereNotIn('id', $keptImages)->get();
+        foreach ($imagesToDelete as $img) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($img->path);
+            $img->delete();
+        }
+
+        foreach ($request->file('images') ?? [] as $img) {
+            $path = $img->store('images', 'public');
+
+            $review->images()->create([
+                'path' => $path,
+            ]);
+        }
+
+        return response()->json($review->load([
+            'images',
+            'reviewer',
+        ]), 200);
     }
 
     /**

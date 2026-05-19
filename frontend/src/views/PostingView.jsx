@@ -1,17 +1,42 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import client from "../api/client";
 import Toggle from "../components/Toggle";
 
 export default function PostingView() {
   const [venta, setVenta] = useState(true);
-
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const isEditing = Boolean(id);
+  const [existingImages, setExistingImages] = useState([]);
   const [form, setForm] = useState({
     title: "",
     description: "",
     price: "",
     images: [],
   });
+  useEffect(() => {
+    if (isEditing) {
+      loadPost();
+    }
+  }, [id]);
 
+  const loadPost = async () => {
+    const res = await client.get(`/posts/${id}`);
+    const post = res.data;
+
+    setVenta(post.venta);
+
+    setForm({
+      title: post.title || "",
+      description: post.description || "",
+      price: post.price || "",
+      images: post.images || [],
+    });
+
+    // Guardar imágenes existentes si deseas mostrarlas
+    setExistingImages(post.images || []);
+  };
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -87,20 +112,41 @@ export default function PostingView() {
     data.append("venta", venta ? 1 : 0);
     data.append("price", venta ? form.price : 0);
 
-    form.images.forEach((file) => {
-      data.append("images[]", file);
+    form.images.forEach((fileOrImg) => {
+      if (fileOrImg.id) {
+        data.append("kept_images[]", fileOrImg.id);
+      } else {
+        data.append("images[]", fileOrImg);
+      }
     });
+    let res;
 
-    await client.post("/posts", data);
+    try {
+      if (isEditing) {
+        data.append("_method", "PUT");
+        await client.post(`/posts/${id}`, data);
+        alert("Post actualizado");
+      } else {
+        await client.post("/posts", data);
+        alert("Post creado");
+      }
 
-    alert("Post creado");
+      setForm({
+        title: "",
+        description: "",
+        price: "",
+        images: [],
+      });
 
-    setForm({
-      title: "",
-      description: "",
-      price: "",
-      images: [],
-    });
+      navigate(`/posts/${id || ""}`);
+
+    } catch (error) {
+      console.error(error);
+      alert(
+        error.response?.data?.message ||
+        "Error al crear el post. Verifica el tamaño de las imágenes."
+      );
+    }
   };
 
   return (
@@ -173,7 +219,7 @@ export default function PostingView() {
             }}
           >
             <img
-              src={URL.createObjectURL(img)}
+              src={img.id ? `http://localhost:8000/storage/${img.path}` : URL.createObjectURL(img)}
               alt=""
               style={{
                 width: "100%",

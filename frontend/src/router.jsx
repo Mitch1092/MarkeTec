@@ -77,6 +77,14 @@ export const router = createBrowserRouter([
         loader: postLoader,
         element: <PostView />,
       },
+      {
+        path: "posts/:id/edit",
+        element: (
+          <ProtectedRoute>
+            <PostingView />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 ]);

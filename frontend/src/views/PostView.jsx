@@ -1,15 +1,30 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import client from "../api/client";
 
 export default function PostView() {
   const { id } = useParams();
-
+  const [currentUser, setCurrentUser] = useState(null);
+  const navigate = useNavigate();
   const [post, setPost] = useState(null);
 
   useEffect(() => {
     loadPost();
   }, []);
+
+  useEffect(() => {
+    loadPost();
+    loadCurrentUser();
+  }, [id]);
+  const isOwner =
+    currentUser &&
+    post &&
+    currentUser.id === post.user_id;
+
+  const loadCurrentUser = async () => {
+    const res = await client.get("/me");
+    setCurrentUser(res.data);
+  };
 
   const loadPost = async () => {
     const res = await client.get(`/posts/${id}`);
@@ -17,7 +32,14 @@ export default function PostView() {
   };
 
   if (!post) return <p>Cargando...</p>;
+  const handleDelete = async () => {
+    if (!confirm("¿Eliminar este post?")) return;
 
+    await client.delete(`/posts/${post.id}`);
+
+    alert("Post eliminado");
+    navigate("/");
+  };
   return (
     <div
       style={{
@@ -68,6 +90,34 @@ export default function PostView() {
       {post.venta && (
         <h2>${post.price}</h2>
       )}
+      {isOwner && (
+        <div
+          style={{
+            display: "flex",
+            gap: "10px",
+            marginTop: "20px",
+          }}
+        >
+          <button
+            onClick={() =>
+              navigate(`/posts/${post.id}/edit`)
+            }
+          >
+            Editar
+          </button>
+
+          <button
+            onClick={handleDelete}
+            style={{
+              background: "#dc2626",
+              color: "white",
+            }}
+          >
+            Eliminar
+          </button>
+        </div>
+      )}
     </div>
+
   );
 }
