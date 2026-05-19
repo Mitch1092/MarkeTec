@@ -13,7 +13,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        return User::all();
+        return User::with('reviewsReceived')->get();
     }
 
     /**
@@ -80,11 +80,13 @@ class UserController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(User $user)
-    {
-         $user->delete();
+    { 
+    $user->update([
+        'activa' => false,
+    ]);
 
-        return response()->json([
-            'message' => 'Usuario eliminado'
-        ], 200);
-    }
+    return response()->json([
+        'message' => 'Usuario eliminado',
+    ]);
+}
 }

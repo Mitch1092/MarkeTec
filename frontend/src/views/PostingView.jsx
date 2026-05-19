@@ -127,7 +127,7 @@ export default function PostingView() {
         await client.post(`/posts/${id}`, data);
         alert("Post actualizado");
       } else {
-        await client.post("/posts", data);
+        res = await client.post("/posts", data);
         alert("Post creado");
       }
 
@@ -138,7 +138,7 @@ export default function PostingView() {
         images: [],
       });
 
-      navigate(`/posts/${id || ""}`);
+      navigate(`/posts/${isEditing ? id : res.data.id}`);
 
     } catch (error) {
       console.error(error);

@@ -232,6 +232,43 @@ export default function ReviewForm({ reviewedId,
         ))}
       </div>
 
+      {existingReview && (
+        <button
+          type="button"
+          onClick={async () => {
+            const confirmed = confirm(
+              "¿Estás seguro de que deseas eliminar esta reseña?"
+            );
+
+            if (!confirmed) return;
+
+            try {
+              await client.delete(`/reviews/${existingReview.id}`);
+
+              alert("Reseña eliminada");
+
+              if (onCreated) {
+                onCreated(null);
+              }
+            } catch (error) {
+              console.error(error);
+              alert("Error al eliminar la reseña");
+            }
+          }}
+          style={{
+            background: "#dc2626",
+            color: "white",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: "8px",
+            cursor: "pointer",
+            marginRight: "10px",
+          }}
+        >
+          Eliminar reseña
+        </button>
+      )}
+
       <button type="submit">
         Enviar review
       </button>

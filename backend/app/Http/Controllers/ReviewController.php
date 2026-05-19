@@ -14,7 +14,7 @@ class ReviewController extends Controller
      */
     public function index()
     {
-        return Review::with('images')->get();
+        return Review::with(['images', 'reviewer', 'reviewed'])->get();
     }
 
     /**
@@ -105,11 +105,13 @@ class ReviewController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(Review $review)
-    {
-         $review->delete();
+    { 
+    $review->update([
+        'activa' => false,
+    ]);
 
-        return response()->json([
-            'message' => 'Review eliminada'
-        ], 200);
+    return response()->json([
+        'message' => 'Reseña eliminada',
+    ]);
     }
 }

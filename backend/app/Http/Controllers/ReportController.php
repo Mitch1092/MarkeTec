@@ -14,7 +14,7 @@ class ReportController extends Controller
      */
     public function index()
     {
-        return Report::with('images')->get();
+        return Report::with(['images', 'reporter', 'reported'])->get();
     }
 
     /**

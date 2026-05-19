@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
 
 export default function PostCard({ post }) {
+  // Azul si es venta, naranja si es búsqueda/compra
+  const borderColor = post.venta ? "#2563eb" : "#f97316";
+
   return (
     <Link
       to={`/posts/${post.id}`}
@@ -11,7 +14,7 @@ export default function PostCard({ post }) {
     >
       <div
         style={{
-          border: "1px solid #ccc",
+          border: `3px solid ${borderColor}`,
           borderRadius: "12px",
           overflow: "hidden",
           cursor: "pointer",
@@ -21,6 +24,9 @@ export default function PostCard({ post }) {
           flexDirection: "column",
 
           background: "white",
+
+          // Opcional: sombra suave con el mismo color del borde
+          boxShadow: `0 0 12px ${borderColor}22`,
         }}
       >
         {/* IMAGEN */}
@@ -68,17 +74,15 @@ export default function PostCard({ post }) {
             flex: 1,
           }}
         >
-          {/* TITULO */}
+          {/* TÍTULO */}
           <h3
             style={{
               margin: 0,
               marginBottom: "10px",
-
               overflow: "hidden",
               display: "-webkit-box",
               WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical",
-
               minHeight: "48px",
             }}
           >

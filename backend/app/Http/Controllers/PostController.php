@@ -123,9 +123,7 @@ class PostController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(Post $post)
-    {
-    $this->authorize('update', $post); // opcional
-
+    { 
     $post->update([
         'activa' => false,
     ]);
