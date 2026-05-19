@@ -1,42 +1,29 @@
-import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+// ReviewForm.jsx
+
 import client from "../api/client";
-import Toggle from "../components/Toggle";
+import { useEffect, useState } from "react";
 
-export default function PostingView() {
-  const [venta, setVenta] = useState(true);
-  const { id } = useParams();
-  const navigate = useNavigate();
-  const isEditing = Boolean(id);
-  const [existingImages, setExistingImages] = useState([]);
+export default function ReviewForm({ reviewedId,
+  existingReview = null,
+  onCreated, }) {
   const [form, setForm] = useState({
-    title: "",
-    description: "",
-    price: "",
-    images: [],
+    description: existingReview?.description || "",
+    score: existingReview?.score || 10,
+    images: existingReview?.images || [],
   });
+
   useEffect(() => {
-    if (isEditing) {
-      loadPost();
-    }
-  }, [id]);
+    if (!existingReview) return;
 
-  const loadPost = async () => {
-    const res = await client.get(`/posts/${id}`);
-    const post = res.data;
+    setForm((prev) => ({
+      ...prev,
+      description: existingReview.description || "",
+      score: existingReview.score || 10,
+      images: existingReview.images || [],
+    }));
+  }, [existingReview]);
 
-    setVenta(post.venta);
-
-    setForm({
-      title: post.title || "",
-      description: post.description || "",
-      price: post.price || "",
-      images: post.images || [],
-    });
-
-    // Guardar imágenes existentes si deseas mostrarlas
-    setExistingImages(post.images || []);
-  };
+  // CAMBIAR CAMPOS DE TEXTO
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -44,11 +31,10 @@ export default function PostingView() {
     });
   };
 
-  // SUBIR IMÁGENES
+  // AGREGAR IMÁGENES (MÁXIMO 8)
   const handleImages = (e) => {
     const files = Array.from(e.target.files);
 
-    // máximo 8
     const combined = [...form.images, ...files].slice(0, 8);
 
     setForm({
@@ -68,7 +54,7 @@ export default function PostingView() {
     });
   };
 
-  // MOVER IZQUIERDA
+  // MOVER A LA IZQUIERDA
   const moveLeft = (index) => {
     if (index === 0) return;
 
@@ -85,7 +71,7 @@ export default function PostingView() {
     });
   };
 
-  // MOVER DERECHA
+  // MOVER A LA DERECHA
   const moveRight = (index) => {
     if (index === form.images.length - 1) return;
 
@@ -102,15 +88,15 @@ export default function PostingView() {
     });
   };
 
+  // ENVIAR REVIEW
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const data = new FormData();
 
-    data.append("title", form.title);
+    data.append("reviewed_id", reviewedId);
     data.append("description", form.description);
-    data.append("venta", venta ? 1 : 0);
-    data.append("price", venta ? form.price : 0);
+    data.append("score", form.score);
 
     form.images.forEach((fileOrImg) => {
       if (fileOrImg.id) {
@@ -119,33 +105,23 @@ export default function PostingView() {
         data.append("images[]", fileOrImg);
       }
     });
+
     let res;
 
-    try {
-      if (isEditing) {
-        data.append("_method", "PUT");
-        await client.post(`/posts/${id}`, data);
-        alert("Post actualizado");
-      } else {
-        res = await client.post("/posts", data);
-        alert("Post creado");
-      }
+    if (existingReview) {
+      // Laravel no acepta multipart/form-data con PUT directamente
+      data.append("_method", "PUT");
 
-      setForm({
-        title: "",
-        description: "",
-        price: "",
-        images: [],
-      });
-
-      navigate(`/posts/${isEditing ? id : res.data.id}`);
-
-    } catch (error) {
-      console.error(error);
-      alert(
-        error.response?.data?.message ||
-        "Error al crear el post. Verifica el tamaño de las imágenes."
+      res = await client.post(
+        `/reviews/${existingReview.id}`,
+        data
       );
+    } else {
+      res = await client.post("/reviews", data);
+    }
+
+    if (onCreated) {
+      onCreated(res.data);
     }
   };
 
@@ -154,20 +130,13 @@ export default function PostingView() {
       onSubmit={handleSubmit}
       style={{
         maxWidth: "700px",
-        margin: "0 auto",
+        marginBottom: "30px",
         display: "flex",
         flexDirection: "column",
         gap: "15px",
       }}
     >
-      <h2>Crear post</h2>
-
-      <input
-        name="title"
-        placeholder="Título"
-        value={form.title}
-        onChange={handleChange}
-      />
+      <h3>Escribir review</h3>
 
       <textarea
         name="description"
@@ -176,18 +145,20 @@ export default function PostingView() {
         onChange={handleChange}
       />
 
-      <Toggle value={venta} onChange={setVenta} />
-
-      {venta && (
+      <div>
+        <label>Score (1 a 10)</label>
         <input
-          name="price"
+          name="score"
           type="number"
-          placeholder="Precio"
-          value={form.price}
+          min="1"
+          max="10"
+          step="0.1"
+          value={form.score}
           onChange={handleChange}
         />
-      )}
+      </div>
 
+      {/* SUBIR IMÁGENES */}
       <div>
         <input
           type="file"
@@ -196,16 +167,15 @@ export default function PostingView() {
           onChange={handleImages}
         />
 
-        <p>
-          {form.images.length}/8 imágenes
-        </p>
+        <p>{form.images.length}/8 imágenes</p>
       </div>
 
       {/* PREVIEW */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
+          gridTemplateColumns:
+            "repeat(auto-fill, minmax(150px, 1fr))",
           gap: "15px",
         }}
       >
@@ -262,8 +232,45 @@ export default function PostingView() {
         ))}
       </div>
 
+      {existingReview && (
+        <button
+          type="button"
+          onClick={async () => {
+            const confirmed = confirm(
+              "¿Estás seguro de que deseas eliminar esta reseña?"
+            );
+
+            if (!confirmed) return;
+
+            try {
+              await client.delete(`/reviews/${existingReview.id}`);
+
+              alert("Reseña eliminada");
+
+              if (onCreated) {
+                onCreated(null);
+              }
+            } catch (error) {
+              console.error(error);
+              alert("Error al eliminar la reseña");
+            }
+          }}
+          style={{
+            background: "#dc2626",
+            color: "white",
+            border: "none",
+            padding: "10px 20px",
+            borderRadius: "8px",
+            cursor: "pointer",
+            marginRight: "10px",
+          }}
+        >
+          Eliminar reseña
+        </button>
+      )}
+
       <button type="submit">
-        Crear
+        Enviar review
       </button>
     </form>
   );

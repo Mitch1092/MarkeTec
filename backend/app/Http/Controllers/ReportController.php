@@ -14,7 +14,7 @@ class ReportController extends Controller
      */
     public function index()
     {
-        return Report::with('images')->get();
+        return Report::with(['images', 'reporter', 'reported'])->get();
     }
 
     /**
@@ -22,18 +22,29 @@ class ReportController extends Controller
      */
     public function store(StoreReportRequest $request)
     {
-        $report = $request ->user()->reports()->create([
+        if ($request->user()->id == $request->reported_id) {
+            return response()->json([
+                'message' => 'No puedes reportarte a ti mismo.'
+            ], 422);
+        }
+
+        $report = Report::create([
+            'reported_id' => $request->reported_id,
+            'reporter_id' => $request->user()->id,
             'description' => $request->description,
         ]);
 
-        foreach ($request-file('images') ?? [] as $img) {
+        foreach ($request->file('images') ?? [] as $img) {
             $path = $img->store('images', 'public');
 
             $report->images()->create([
                 'path' => $path,
             ]);
         }
-        return response()->json($report->load('images'));
+        return response()->json($report->load([
+            'images',
+            'reporter',
+        ]));
     }
 
     /**
@@ -68,10 +79,23 @@ class ReportController extends Controller
      */
     public function destroy(Report $report)
     {
-         $report->delete();
+        $report->update([
+            'activa' => false,
+        ]);
 
         return response()->json([
             'message' => 'Reporte eliminado'
+        ], 200);
+    }
+
+    public function reactivate(Report $report)
+    {
+        $report->update([
+            'activa' => true,
+        ]);
+
+        return response()->json([
+            'message' => 'Reporte reactivado'
         ], 200);
     }
 }

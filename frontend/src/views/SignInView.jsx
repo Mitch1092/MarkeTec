@@ -6,9 +6,10 @@ import { useNavigate } from "react-router-dom";
 
 export default function SignInView() {
   const { login } = useAuth();
-
+  const navigate = useNavigate();
   const handleLogin = async (form) => {
-    await login(form); // 🔥 SOLO ESTO
+    await login(form);
+    navigate("/profile");
   };
 
 

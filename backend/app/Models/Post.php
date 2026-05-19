@@ -11,6 +11,7 @@ class Post extends Model
         'description',
         'venta',
         'price',
+        'activa',
     ];
 
     public function user()
@@ -21,5 +22,12 @@ class Post extends Model
     public function images()
     {
         return $this->hasMany(Image::class);
+    }
+
+    protected static function booted()
+    {
+        static::addGlobalScope('activa', function (\Illuminate\Database\Eloquent\Builder $builder) {
+            $builder->where('activa', true);
+        });
     }
 }

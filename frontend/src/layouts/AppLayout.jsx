@@ -16,7 +16,11 @@ export default function AppLayout() {
 
           {!user && <Link to="/signin">Login</Link>}
           {!user && <Link to="/signup">Registro</Link>}
-
+          {user?.admin && (
+            <Link to="/admin" style={{ color: "white" }}>
+              Admin
+            </Link>
+          )}
           {user && (
             <button onClick={logout} style={{ marginLeft: "auto" }}>
               Salir

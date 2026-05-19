@@ -13,7 +13,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        return User::all();
+        return User::with('reviewsReceived')->get();
     }
 
     /**
@@ -45,9 +45,11 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        return response()->json(
-            $user->load('posts.images')
-        );
+        return response()->json($user->load(
+            'posts.images',  
+            'reviewsReceived.reviewer',
+            'reviewsReceived.images',
+        ));
     }
 
     /**
@@ -78,11 +80,24 @@ class UserController extends Controller
      * Remove the specified resource from storage.
      */
     public function destroy(User $user)
-    {
-         $user->delete();
+    { 
+        $user->update([
+            'activa' => false,
+        ]);
 
         return response()->json([
-            'message' => 'Usuario eliminado'
-        ], 200);
+            'message' => 'Usuario eliminado',
+        ]);
+    }
+
+    public function reactivate(User $user)
+    {
+        $user->update([
+            'activa' => true,
+        ]);
+
+        return response()->json([
+            'message' => 'Usuario reactivado',
+        ]);
     }
 }

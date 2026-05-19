@@ -12,8 +12,11 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
+        if ($request->user() && $request->user()->admin) {
+            return Post::withoutGlobalScope('activa')->with('images')->get();
+        }
         return Post::with('images')->get();
     }
 
@@ -73,16 +76,15 @@ class PostController extends Controller
             ]);
         }
 
-
-
         return response()->json($post->load('images'));
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Post $post)
+    public function show($id)
     {
+        $post = Post::withoutGlobalScope('activa')->findOrFail($id);
         return response()->json(
             $post->load(['user', 'images'])
         );
@@ -91,31 +93,61 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePostRequest $request, Post $post)
-    {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|numeric|min:0'
-        ]);
+    public function update(StorePostRequest $request, $id)
+{
+    $post = Post::withoutGlobalScope('activa')->findOrFail($id);
+    $post->update([
+        'title' => $request->title,
+        'description' => $request->description,
+        'venta' => $request->boolean('venta'),
+        'price' => $request->boolean('venta')
+            ? $request->price
+            : 0,
+    ]);
 
-        $data = $request->all();
-
-
-        $post->update($data);
-
-        return response()->json($post, 200);
+    $keptImages = $request->input('kept_images', []);
+        
+    $imagesToDelete = $post->images()->whereNotIn('id', $keptImages)->get();
+    foreach ($imagesToDelete as $img) {
+        \Illuminate\Support\Facades\Storage::disk('public')->delete($img->path);
+        $img->delete();
     }
+
+    foreach ($request->file('images') ?? [] as $img) {
+        $path = $img->store('images', 'public');
+
+        $post->images()->create([
+            'path' => $path,
+        ]);
+    }
+
+    return response()->json($post->load('images'));
+}
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Post $post)
-    {
-         $post->delete();
+    public function destroy($id)
+    { 
+        $post = Post::withoutGlobalScope('activa')->findOrFail($id);
+        $post->update([
+            'activa' => false,
+        ]);
+
+    return response()->json([
+        'message' => 'Post eliminado',
+    ]);
+    }
+
+    public function reactivate(\Illuminate\Http\Request $request, $id)
+    { 
+        $post = Post::withoutGlobalScope('activa')->findOrFail($id);
+        $post->update([
+            'activa' => true,
+        ]);
 
         return response()->json([
-            'message' => 'Post eliminado'
-        ], 200);
+            'message' => 'Post reactivado',
+        ]);
     }
 }
