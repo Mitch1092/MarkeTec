@@ -150,121 +150,130 @@ export default function PostingView() {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      style={{
-        maxWidth: "700px",
-        margin: "0 auto",
-        display: "flex",
-        flexDirection: "column",
-        gap: "15px",
-      }}
-    >
-      <h2>Crear post</h2>
+    <div className="container" style={{ maxWidth: "800px" }}>
+      <div className="card" style={{ padding: '32px' }}>
+        <h1 style={{ marginTop: 0, marginBottom: '24px' }}>{isEditing ? "Editar Publicación" : "Crear Publicación"}</h1>
 
-      <input
-        name="title"
-        placeholder="Título"
-        value={form.title}
-        onChange={handleChange}
-      />
-
-      <textarea
-        name="description"
-        placeholder="Descripción"
-        value={form.description}
-        onChange={handleChange}
-      />
-
-      <Toggle value={venta} onChange={setVenta} />
-
-      {venta && (
-        <input
-          name="price"
-          type="number"
-          placeholder="Precio"
-          value={form.price}
-          onChange={handleChange}
-        />
-      )}
-
-      <div>
-        <input
-          type="file"
-          multiple
-          accept="image/*"
-          onChange={handleImages}
-        />
-
-        <p>
-          {form.images.length}/8 imágenes
-        </p>
-      </div>
-
-      {/* PREVIEW */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
-          gap: "15px",
-        }}
-      >
-        {form.images.map((img, index) => (
-          <div
-            key={index}
-            style={{
-              border: "1px solid #ccc",
-              padding: "10px",
-              borderRadius: "10px",
-            }}
-          >
-            <img
-              src={img.id ? `http://localhost:8000/storage/${img.path}` : URL.createObjectURL(img)}
-              alt=""
-              style={{
-                width: "100%",
-                height: "150px",
-                objectFit: "cover",
-                borderRadius: "10px",
-              }}
+        <form onSubmit={handleSubmit} className="flex-col gap-4">
+          
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Título</label>
+            <input
+              name="title"
+              placeholder="Ej. MacBook Pro M1"
+              value={form.title}
+              onChange={handleChange}
+              className="input-field"
+              required
             />
+          </div>
 
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginTop: "10px",
-                gap: "5px",
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => moveLeft(index)}
-              >
-                ←
-              </button>
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Descripción</label>
+            <textarea
+              name="description"
+              placeholder="Describe tu producto..."
+              value={form.description}
+              onChange={handleChange}
+              className="input-field"
+              style={{ minHeight: '120px', resize: 'vertical' }}
+              required
+            />
+          </div>
 
-              <button
-                type="button"
-                onClick={() => moveRight(index)}
-              >
-                →
-              </button>
+          <div style={{ padding: '16px', backgroundColor: 'var(--color-border-light)', borderRadius: 'var(--radius-md)' }}>
+            <label style={{ display: 'block', marginBottom: '12px', fontWeight: 'bold' }}>Tipo de Publicación</label>
+            <Toggle value={venta} onChange={setVenta} />
+          </div>
 
-              <button
-                type="button"
-                onClick={() => removeImage(index)}
-              >
-                X
-              </button>
+          {venta && (
+            <div>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Precio ($)</label>
+              <input
+                name="price"
+                type="number"
+                placeholder="Ej. 15000"
+                value={form.price}
+                onChange={handleChange}
+                className="input-field"
+                required={venta}
+                min="0"
+              />
+            </div>
+          )}
+
+          <div>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Imágenes ({form.images.length}/8)</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <label className="btn btn-secondary" style={{ cursor: 'pointer' }}>
+                Seleccionar Archivos
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImages}
+                  style={{ display: 'none' }}
+                />
+              </label>
+              <span style={{ color: 'var(--color-text-secondary)', fontSize: '14px' }}>Primera imagen será la portada</span>
             </div>
           </div>
-        ))}
-      </div>
 
-      <button type="submit">
-        Crear
-      </button>
-    </form>
+          {/* PREVIEW */}
+          {form.images.length > 0 && (
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))",
+              gap: "16px",
+              marginTop: "8px"
+            }}>
+              {form.images.map((img, index) => (
+                <div key={index} style={{
+                  position: 'relative',
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "var(--radius-md)",
+                  overflow: 'hidden',
+                  backgroundColor: 'var(--color-border-light)'
+                }}>
+                  <img
+                    src={img.id ? `http://localhost:8000/storage/${img.path}` : URL.createObjectURL(img)}
+                    alt=""
+                    style={{
+                      width: "100%",
+                      aspectRatio: "1/1",
+                      objectFit: "cover",
+                    }}
+                  />
+
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    padding: "8px",
+                    backgroundColor: 'var(--color-surface)',
+                    borderTop: '1px solid var(--color-border)'
+                  }}>
+                    <button type="button" onClick={() => moveLeft(index)} disabled={index === 0} style={{ border: 'none', background: 'none', cursor: 'pointer', opacity: index === 0 ? 0.3 : 1 }}>
+                      ⬅️
+                    </button>
+                    <button type="button" onClick={() => removeImage(index)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--color-error)' }}>
+                      🗑️
+                    </button>
+                    <button type="button" onClick={() => moveRight(index)} disabled={index === form.images.length - 1} style={{ border: 'none', background: 'none', cursor: 'pointer', opacity: index === form.images.length - 1 ? 0.3 : 1 }}>
+                      ➡️
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div style={{ marginTop: '24px' }}>
+            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '14px', fontSize: '16px' }}>
+              {isEditing ? "Guardar Cambios" : "Publicar"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }

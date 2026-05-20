@@ -1,19 +1,19 @@
 import PostCard from "./PostCard";
 
 export default function PostGrid({ posts }) {
+  if (!posts?.length) {
+    return (
+      <div style={{ textAlign: 'center', padding: '40px', color: 'var(--color-text-secondary)' }}>
+        No hay publicaciones para mostrar.
+      </div>
+    );
+  }
+
   return (
-    <div style={styles.grid}>
+    <div className="grid-layout">
       {posts.map((post) => (
         <PostCard key={post.id} post={post} />
       ))}
     </div>
   );
 }
-
-const styles = {
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-    gap: "16px",
-  },
-};

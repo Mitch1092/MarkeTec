@@ -1,7 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Toggle({ value, onChange }) {
-  const [enabled, setEnabled] = useState(value ?? false);
+  const [enabled, setEnabled] = useState(value ?? true);
+
+  useEffect(() => {
+    setEnabled(value ?? true);
+  }, [value]);
 
   const toggle = () => {
     const newValue = !enabled;
@@ -10,37 +14,44 @@ export default function Toggle({ value, onChange }) {
   };
 
   return (
-    <div style={styles.wrapper}>
-      <span style={{ marginRight: "10px" }}>
-        {enabled ? "En venta 💰" : "Es búsqueda 📝"}
+    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', margin: '8px 0' }}>
+      
+      {/* Etiqueta Visual */}
+      <span style={{ 
+        fontWeight: 'bold', 
+        fontSize: '16px',
+        color: enabled ? 'var(--color-sale)' : 'var(--color-buy)',
+        width: '120px'
+      }}>
+        {enabled ? "Venta 💰" : "Buscando 📝"}
       </span>
 
-      <button
-        type="button"
+      {/* Switch Background */}
+      <div 
         onClick={toggle}
         style={{
-          ...styles.button,
-          background: enabled ? "#22c55e" : "#e5e7eb",
-          color: enabled ? "white" : "black",
+          width: '56px',
+          height: '32px',
+          backgroundColor: enabled ? 'var(--color-sale)' : 'var(--color-buy)',
+          borderRadius: 'var(--radius-pill)',
+          position: 'relative',
+          cursor: 'pointer',
+          transition: 'background-color 0.3s'
         }}
       >
-        {enabled ? "ON" : "OFF"}
-      </button>
+        {/* Switch Knob */}
+        <div style={{
+          width: '24px',
+          height: '24px',
+          backgroundColor: 'white',
+          borderRadius: '50%',
+          position: 'absolute',
+          top: '4px',
+          left: enabled ? '28px' : '4px',
+          transition: 'left 0.3s cubic-bezier(0.2, 0.85, 0.32, 1.2)',
+          boxShadow: 'var(--shadow-sm)'
+        }}></div>
+      </div>
     </div>
   );
 }
-
-const styles = {
-  wrapper: {
-    display: "flex",
-    alignItems: "center",
-    margin: "10px 0",
-  },
-  button: {
-    padding: "6px 14px",
-    borderRadius: "20px",
-    border: "none",
-    cursor: "pointer",
-    transition: "0.2s",
-  },
-};

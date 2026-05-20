@@ -35,92 +35,57 @@ export default function BrowsingView() {
   }, [posts, activeTab, search]);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "20px",
-      }}
-    >
-      <h1>Explorar publicaciones</h1>
+    <div className="flex-col gap-6">
+      <div className="flex justify-between items-center" style={{ flexWrap: 'wrap', gap: '16px' }}>
+        <h1 style={{ margin: 0, fontSize: '28px' }}>Explorar Publicaciones</h1>
+
+        <div className="flex gap-2">
+          <button
+            onClick={() => setActiveTab("venta")}
+            className={`btn ${activeTab === "venta" ? "btn-primary" : "btn-secondary"}`}
+            style={{ borderRadius: 'var(--radius-pill)', padding: '8px 20px' }}
+          >
+            En Venta
+          </button>
+          
+          <button
+            onClick={() => setActiveTab("compra")}
+            className={`btn ${activeTab === "compra" ? "" : "btn-secondary"}`}
+            style={{ 
+              borderRadius: 'var(--radius-pill)', 
+              padding: '8px 20px',
+              backgroundColor: activeTab === "compra" ? 'var(--color-buy)' : '',
+              color: activeTab === "compra" ? 'white' : ''
+            }}
+          >
+            Buscando
+          </button>
+        </div>
+      </div>
 
       {/* BUSCADOR */}
-      <input
-        type="text"
-        placeholder="Buscar por título..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        style={{
-          padding: "12px",
-          fontSize: "16px",
-          borderRadius: "8px",
-          border: "1px solid #ccc",
-          width: "100%",
-          maxWidth: "500px",
-        }}
-      />
-
-      {/* PESTAÑAS */}
-      <div
-        style={{
-          display: "flex",
-          gap: "10px",
-        }}
-      >
-        <button
-          onClick={() => setActiveTab("venta")}
-          style={{
-            padding: "10px 20px",
-            borderRadius: "8px",
-            border: "none",
-            cursor: "pointer",
-            fontWeight: "bold",
-            background:
-              activeTab === "venta"
-                ? "#2563eb"
-                : "#e5e7eb",
-            color:
-              activeTab === "venta"
-                ? "white"
-                : "black",
-          }}
-        >
-          Venta
-        </button>
-
-        <button
-          onClick={() => setActiveTab("compra")}
-          style={{
-            padding: "10px 20px",
-            borderRadius: "8px",
-            border: "none",
-            cursor: "pointer",
-            fontWeight: "bold",
-            background:
-              activeTab === "compra"
-                ? "#f97316"
-                : "#e5e7eb",
-            color:
-              activeTab === "compra"
-                ? "white"
-                : "black",
-          }}
-        >
-          Compra
-        </button>
+      <div style={{ position: 'relative', maxWidth: '600px' }}>
+        <input
+          type="text"
+          placeholder="Buscar publicaciones..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="input-field"
+          style={{ paddingLeft: '40px', borderRadius: 'var(--radius-pill)' }}
+        />
+        <span style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-tertiary)' }}>
+          🔍
+        </span>
       </div>
 
       {/* RESULTADOS */}
-      <p
-        style={{
-          color: "#666",
-          margin: 0,
-        }}
-      >
-        {filteredPosts.length} publicaciones encontradas
-      </p>
+      <div>
+        <p style={{ color: "var(--color-text-secondary)", marginBottom: '16px', fontSize: '14px' }}>
+          {filteredPosts.length} resultados encontrados
+        </p>
 
-      <PostGrid posts={filteredPosts} />
+        <PostGrid posts={filteredPosts} />
+      </div>
     </div>
   );
 }

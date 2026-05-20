@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Input from "./Input";
 import Button from "./Button";
 
@@ -32,61 +33,94 @@ export default function AuthForm({ type = "login", onSubmit }) {
     setLoading(false);
   };
 
+  const isLogin = type === "login";
+
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>{type === "login" ? "Login" : "Registro"}</h2>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh' }}>
+      <div className="card" style={{ width: '100%', maxWidth: '450px', padding: '40px 32px' }}>
+        <h2 style={{ textAlign: 'center', fontSize: '28px', marginBottom: '8px' }}>
+          {isLogin ? "Bienvenido de nuevo" : "Crea tu cuenta"}
+        </h2>
+        <p style={{ textAlign: 'center', color: 'var(--color-text-secondary)', marginBottom: '32px' }}>
+          {isLogin ? "Ingresa tus datos para continuar" : "Únete a la comunidad de Marketec"}
+        </p>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+        <form onSubmit={handleSubmit}>
+          {error && (
+            <div style={{ 
+              backgroundColor: 'rgba(250, 56, 62, 0.1)', 
+              color: 'var(--color-error)', 
+              padding: '12px', 
+              borderRadius: 'var(--radius-md)', 
+              marginBottom: '20px',
+              fontSize: '14px',
+              textAlign: 'center'
+            }}>
+              {error}
+            </div>
+          )}
 
-      {type === "register" && (
-        <Input
-          label="Nombre"
-          value={form.name}
-          onChange={(e) => handleChange("name", e.target.value)}
-        />
+          {!isLogin && (
+            <>
+              <Input
+                label="Nombre Completo"
+                value={form.name}
+                onChange={(e) => handleChange("name", e.target.value)}
+                required
+              />
+              <Input
+                label="Número de Control"
+                value={form.ncontrol}
+                onChange={(e) => handleChange("ncontrol", e.target.value)}
+                required
+              />
+            </>
+          )}
 
+          <Input
+            label="Correo Electrónico"
+            type="email"
+            value={form.email}
+            onChange={(e) => handleChange("email", e.target.value)}
+            required
+          />
 
+          {!isLogin && (
+            <Input
+              label="Teléfono (WhatsApp)"
+              value={form.phone}
+              onChange={(e) => handleChange("phone", e.target.value)}
+              required
+            />
+          )}
 
-      )}
+          <Input
+            label="Contraseña"
+            type="password"
+            value={form.password}
+            onChange={(e) => handleChange("password", e.target.value)}
+            required
+          />
 
-      {type === "register" && (
-    
+          <div style={{ marginTop: '32px' }}>
+            <Button type="submit" disabled={loading} style={{ padding: '12px' }}>
+              {loading ? "Cargando..." : isLogin ? "Iniciar Sesión" : "Registrarse"}
+            </Button>
+          </div>
+        </form>
 
-        <Input
-          label="N.Control"
-          value={form.ncontrol}
-          onChange={(e) => handleChange("ncontrol", e.target.value)}
-        />
-
-      )}
-
-      <Input
-        label="Email"
-        value={form.email}
-        onChange={(e) => handleChange("email", e.target.value)}
-      />
-
-      {type === "register" && (
-    
-
-        <Input
-          label="Teléfono"
-          value={form.phone}
-          onChange={(e) => handleChange("phone", e.target.value)}
-        />
-
-      )}
-
-      <Input
-        label="Password"
-        type="password"
-        value={form.password}
-        onChange={(e) => handleChange("password", e.target.value)}
-      />
-
-      <Button type="submit">
-        {loading ? "Cargando..." : type === "login" ? "Entrar" : "Registrarse"}
-      </Button>
-    </form>
+        <div style={{ textAlign: 'center', marginTop: '24px', fontSize: '14px', color: 'var(--color-text-secondary)' }}>
+          {isLogin ? (
+            <>
+              ¿No tienes cuenta? <Link to="/signup" style={{ fontWeight: 'bold' }}>Regístrate</Link>
+            </>
+          ) : (
+            <>
+              ¿Ya tienes cuenta? <Link to="/signin" style={{ fontWeight: 'bold' }}>Inicia sesión</Link>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

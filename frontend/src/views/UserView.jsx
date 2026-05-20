@@ -68,40 +68,33 @@ export default function UserView() {
           : "Sin reseñas";
 
   return (
-    <div>
+    <div className="flex-col gap-6">
       {user && (
-        <div style={{ marginBottom: "30px", padding: "20px", background: "white", borderRadius: "12px", boxShadow: "0 4px 10px rgba(0,0,0,0.08)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "15px" }}>
-            <div>
-              <h1 style={{ marginTop: 0 }}>Mi Perfil</h1>
-              <p style={{ margin: "5px 0" }}>{user.name}</p>
-              <p style={{ margin: "5px 0", color: "#666" }}>{user.email}</p>
-              <p style={{ margin: "5px 0", color: "#666" }}>Teléfono: {user.phone || "No especificado"}</p>
-              <p
-                  style={{
-                      marginTop: "15px",
-                      marginBottom: 0,
-                      fontSize: "18px",
-                      fontWeight: "bold",
-                      color: "#2563eb",
-                  }}
-              >
-                  ⭐ Mi calificación promedio: {averageScore}
-              </p>
+        <div className="card" style={{ padding: '32px' }}>
+          <div className="flex justify-between items-center" style={{ flexWrap: 'wrap', gap: '20px' }}>
+            <div className="flex items-center gap-4">
+              <div style={{
+                width: '80px', height: '80px', borderRadius: '50%',
+                backgroundColor: 'var(--color-primary)', color: 'white',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '32px', fontWeight: 'bold'
+              }}>
+                {user.name?.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h1 style={{ margin: '0 0 8px 0', fontSize: '28px' }}>Mi Perfil</h1>
+                <p style={{ margin: 0, fontSize: '18px', fontWeight: '600' }}>{user.name}</p>
+                <p style={{ margin: '4px 0 0 0', color: 'var(--color-text-secondary)' }}>{user.email}</p>
+                <p style={{ margin: '4px 0 0 0', color: 'var(--color-text-secondary)' }}>Tel: {user.phone || "No especificado"}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '8px' }}>
+                  <span style={{ color: '#f59e0b', fontSize: '20px' }}>★</span>
+                  <span style={{ fontWeight: 'bold' }}>{averageScore}</span>
+                  <span style={{ color: 'var(--color-text-tertiary)' }}>({reviews.length})</span>
+                </div>
+              </div>
             </div>
             
-            <button
-              onClick={handleEditClick}
-              style={{
-                background: "#2563eb",
-                color: "white",
-                border: "none",
-                padding: "10px 20px",
-                borderRadius: "8px",
-                cursor: "pointer",
-                fontWeight: "bold",
-              }}
-            >
+            <button className="btn btn-secondary" onClick={handleEditClick}>
               Editar Perfil
             </button>
           </div>
@@ -110,110 +103,46 @@ export default function UserView() {
 
       {/* MODAL PARA EDITAR PERFIL */}
       {showEditModal && (
-        <div
-          onClick={() => setShowEditModal(false)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            padding: "20px",
-            zIndex: 1000,
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: "white",
-              borderRadius: "12px",
-              padding: "30px",
-              width: "100%",
-              maxWidth: "500px",
-              position: "relative",
-            }}
-          >
-            <button
-              onClick={() => setShowEditModal(false)}
-              style={{
-                position: "absolute",
-                top: "10px",
-                right: "10px",
-                border: "none",
-                background: "transparent",
-                fontSize: "24px",
-                cursor: "pointer",
-              }}
-            >
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)",
+          display: "flex", justifyContent: "center", alignItems: "center",
+          padding: "20px", zIndex: 1000, backdropFilter: 'blur(4px)'
+        }} onClick={() => setShowEditModal(false)}>
+          
+          <div className="card" style={{ padding: '32px', width: '100%', maxWidth: '500px', position: 'relative' }} onClick={(e) => e.stopPropagation()}>
+            <button onClick={() => setShowEditModal(false)} style={{
+              position: 'absolute', top: '16px', right: '16px',
+              background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--color-text-tertiary)'
+            }}>
               ×
             </button>
 
-            <h2 style={{ marginTop: 0 }}>Editar Perfil</h2>
+            <h2 style={{ marginTop: 0, marginBottom: '24px' }}>Editar Perfil</h2>
 
-            <form onSubmit={handleUpdateProfile} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-              
+            <form onSubmit={handleUpdateProfile} className="flex-col gap-4">
               <div>
-                <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Correo Electrónico</label>
-                <input
-                  type="email"
-                  value={editForm.email}
-                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                  style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ccc", boxSizing: "border-box" }}
-                  required
-                />
+                <label style={{ display: "block", marginBottom: "8px", fontWeight: "600", fontSize: '14px' }}>Correo Electrónico</label>
+                <input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} className="input-field" required />
               </div>
 
               <div>
-                <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Teléfono</label>
-                <input
-                  type="text"
-                  value={editForm.phone}
-                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                  style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ccc", boxSizing: "border-box" }}
-                  required
-                />
+                <label style={{ display: "block", marginBottom: "8px", fontWeight: "600", fontSize: '14px' }}>Teléfono</label>
+                <input type="text" value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="input-field" required />
               </div>
 
               <div>
-                <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Nueva Contraseña (opcional)</label>
-                <input
-                  type="password"
-                  placeholder="Dejar en blanco para no cambiarla"
-                  value={editForm.password}
-                  onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
-                  style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #ccc", boxSizing: "border-box" }}
-                />
+                <label style={{ display: "block", marginBottom: "8px", fontWeight: "600", fontSize: '14px' }}>Nueva Contraseña (opcional)</label>
+                <input type="password" placeholder="Dejar en blanco para no cambiarla" value={editForm.password} onChange={(e) => setEditForm({ ...editForm, password: e.target.value })} className="input-field" />
               </div>
 
-              <hr style={{ margin: "10px 0", border: "none", borderTop: "1px solid #eee" }} />
+              <hr style={{ margin: "16px 0", border: "none", borderTop: "1px solid var(--color-border-light)" }} />
 
               <div>
-                <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", color: "#dc2626" }}>Contraseña Actual (requerida)</label>
-                <input
-                  type="password"
-                  placeholder="Confirma tu contraseña actual"
-                  value={editForm.current_password}
-                  onChange={(e) => setEditForm({ ...editForm, current_password: e.target.value })}
-                  style={{ width: "100%", padding: "10px", borderRadius: "8px", border: "1px solid #dc2626", boxSizing: "border-box" }}
-                  required
-                />
+                <label style={{ display: "block", marginBottom: "8px", fontWeight: "600", fontSize: '14px', color: 'var(--color-error)' }}>Contraseña Actual (requerida)</label>
+                <input type="password" placeholder="Confirma tu contraseña actual" value={editForm.current_password} onChange={(e) => setEditForm({ ...editForm, current_password: e.target.value })} className="input-field" style={{ borderColor: 'var(--color-error)' }} required />
               </div>
 
-              <button
-                type="submit"
-                style={{
-                  background: "#2563eb",
-                  color: "white",
-                  padding: "12px",
-                  borderRadius: "8px",
-                  border: "none",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                  fontSize: "16px",
-                  marginTop: "10px",
-                }}
-              >
+              <button type="submit" className="btn btn-primary" style={{ marginTop: '16px', width: '100%' }}>
                 Guardar Cambios
               </button>
             </form>
@@ -221,9 +150,10 @@ export default function UserView() {
         </div>
       )}
 
-      <h2 style={{ marginBottom: "20px" }}>Mis posts</h2>
-
-      <PostGrid posts={posts} />
+      <div>
+        <h2 style={{ marginBottom: "20px" }}>Mis Publicaciones</h2>
+        <PostGrid posts={posts} />
+      </div>
     </div>
   );
 }
