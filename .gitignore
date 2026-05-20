@@ -1,3 +1,4 @@
+.env
 /backend/*.log
 /backend/.DS_Store
 /backend/.env
