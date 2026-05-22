@@ -19,6 +19,8 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/posts/{post}', [PostController::class, 'show']);
 Route::get('/users/{user}', [UserController::class, 'show']);
+Route::get('/posts', [PostController::class, 'index']);
+//Route::get('/posts/{post}', [PostController::class, 'index']);
 /*
 |--------------------------------------------------------------------------
 | Protected routes (Sanctum)
@@ -29,9 +31,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
+    Route::apiResource('posts', PostController::class)->except(['index', 'store', 'show']);
+    //Route::apiResource('posts/{post}', PostController::class)->except(['index', 'store']);
 
     // Posts protegidos
-    Route::apiResource('posts', PostController::class);
+    Route::post('posts', [PostController::class, 'store']);
     Route::patch('/posts/{post}/reactivate', [PostController::class, 'reactivate']);
 
     Route::apiResource('users', UserController::class);

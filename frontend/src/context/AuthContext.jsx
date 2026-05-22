@@ -1,10 +1,12 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import client from "../api/client";
 
+
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // 🔥 cargar usuario al refrescar página
   useEffect(() => {
@@ -20,7 +22,10 @@ export function AuthProvider({ children }) {
       .catch(() => {
         localStorage.removeItem("token");
         setUser(null);
-      });
+      })
+      .finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
   }, []);
 
@@ -40,12 +45,15 @@ export function AuthProvider({ children }) {
 
   // LOGOUT
   const logout = async () => {
+    
     localStorage.removeItem("token");
     setUser(null);
+    console.log("Sesión cerrada.");
+ 
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, login, logout }}>
+    <AuthContext.Provider value={{ user, setUser, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

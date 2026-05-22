@@ -18,11 +18,6 @@ import PublicUserView from "./views/PublicUserView";
 import PostView from "./views/PostView";
 
 // LOADERS
-async function usersLoader() {
-  const res = await client.get("/users");
-  return res.data;
-}
-
 async function postLoader({ params }) {
   const res = await client.get(`/posts/${params.id}`);
   return res.data;
@@ -55,7 +50,6 @@ export const router = createBrowserRouter([
 
       {
         path: "profile",
-        loader: usersLoader,
         element: (
           <ProtectedRoute>
             <UserView />

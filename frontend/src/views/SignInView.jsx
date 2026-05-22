@@ -18,6 +18,7 @@ export default function SignInView() {
 
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    navigate("/signin");
   };
 
   const getPosts = async () => {
