@@ -38,7 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('posts', [PostController::class, 'store']);
     Route::patch('/posts/{post}/reactivate', [PostController::class, 'reactivate']);
 
-    Route::apiResource('users', UserController::class);
+    Route::apiResource('users', UserController::class)->except(['show']);
     Route::patch('/users/{user}/reactivate', [UserController::class, 'reactivate']);
 
     Route::apiResource('reports', ReportController::class);

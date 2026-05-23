@@ -177,7 +177,7 @@ export default function PostingView() {
               onChange={handleChange}
               className="input-field"
               style={{ minHeight: '120px', resize: 'vertical' }}
-              required
+              //required
             />
           </div>
 

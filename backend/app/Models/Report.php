@@ -27,4 +27,11 @@ class Report extends Model
     {
         return $this->hasMany(Image::class);
     }
+
+    protected static function booted()
+    {
+        static::addGlobalScope('activa', function (\Illuminate\Database\Eloquent\Builder $builder) {
+            $builder->where('activa', true);
+        });
+    }
 }

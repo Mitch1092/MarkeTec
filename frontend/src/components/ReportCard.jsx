@@ -36,7 +36,7 @@ export default function ReportCard({ report }) {
                         marginTop: "10px",
                     }}
                 >
-                    {review.images.map((img) => (
+                    {report.images.map((img) => (
                         <img
                             key={img.id}
                             src={`http://localhost:8000/storage/${img.path}`}

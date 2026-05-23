@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import client from "../api/client";
 import PostGrid from "../components/PostGrid";
+import ReviewCard from "../components/ReviewCard";
 import { useAuth } from "../context/AuthContext";
 
 export default function UserView() {
   const [posts, setPosts] = useState([]);
   const { user, setUser } = useAuth();
+  const [activeTab, setActiveTab] = useState("posts");
 
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -150,10 +152,68 @@ export default function UserView() {
         </div>
       )}
 
-      <div>
-        <h2 style={{ marginBottom: "20px" }}>Mis Publicaciones</h2>
-        <PostGrid posts={posts} />
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginBottom: "25px",
+        }}
+      >
+        <button
+          onClick={() => setActiveTab("posts")}
+          style={{
+            padding: "10px 20px",
+            borderRadius: "8px",
+            border: "1px solid #ccc",
+            cursor: "pointer",
+            background:
+              activeTab === "posts" ? "var(--color-primary)" : "white",
+            color:
+              activeTab === "posts" ? "white" : "black",
+            fontWeight: "bold",
+          }}
+        >
+          Mis Publicaciones ({posts.length})
+        </button>
+
+        <button
+          onClick={() => setActiveTab("reviews")}
+          style={{
+            padding: "10px 20px",
+            borderRadius: "8px",
+            border: "1px solid #ccc",
+            cursor: "pointer",
+            background:
+              activeTab === "reviews" ? "var(--color-primary)" : "white",
+            color:
+              activeTab === "reviews" ? "white" : "black",
+            fontWeight: "bold",
+          }}
+        >
+          Mis Reseñas ({reviews.length})
+        </button>
       </div>
+
+      {activeTab === "posts" && (
+        <div>
+          <PostGrid posts={posts} />
+        </div>
+      )}
+
+      {activeTab === "reviews" && (
+        <div>
+          {reviews.length > 0 ? (
+            reviews.map((review) => (
+              <ReviewCard
+                key={review.id}
+                review={review}
+              />
+            ))
+          ) : (
+            <p>Aún no tienes reseñas.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

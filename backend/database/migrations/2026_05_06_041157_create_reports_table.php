@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->foreignId('reported_id')->constrained('users');
             $table->foreignId('reporter_id')->constrained('users');
+            $table->boolean('activa')->default(true);
         });
     }
 

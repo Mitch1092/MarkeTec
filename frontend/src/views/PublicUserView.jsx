@@ -1,17 +1,25 @@
 // PublicUserView.jsx
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import client from "../api/client";
 import PostCard from "../components/PostCard";
 import ReviewCard from "../components/ReviewCard";
 import ReviewForm from "../components/ReviewForm";
 import ReportForm from "../components/ReportForm";
+import { useAuth } from "../context/AuthContext";
 
 export default function PublicUserView() {
   const { id } = useParams();
+  const { user: currentUser } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (currentUser && currentUser.id == id) {
+      navigate('/profile', { replace: true });
+    }
+  }, [currentUser, id, navigate]);
 
   const [user, setUser] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
 
   const [activeTab, setActiveTab] = useState("posts");
 
@@ -21,7 +29,6 @@ export default function PublicUserView() {
 
   useEffect(() => {
     loadUser();
-    loadCurrentUser();
   }, [id]);
 
   useEffect(() => {
@@ -35,21 +42,12 @@ export default function PublicUserView() {
   }, [user, currentUser]);
 
   const loadUser = async () => {
-    const res = await client.get(`/users/${id}`);
-    setUser(res.data);
-
-    if (currentUser) {
-      const existing = res.data.reviews_received?.find(
-        (review) => review.reviewer_id === currentUser.id
-      );
-
-      setExistingReview(existing || null);
+    try {
+      const res = await client.get(`/users/${id}`);
+      setUser(res.data);
+    } catch (err) {
+      console.error(err);
     }
-  };
-
-  const loadCurrentUser = async () => {
-    const res = await client.get("/me");
-    setCurrentUser(res.data);
   };
 
   const handleReviewCreated = (review) => {
@@ -65,11 +63,11 @@ export default function PublicUserView() {
     setActiveTab("reviews");
   };
 
-  if (!user || !currentUser) {
+  if (!user) {
     return <p>Cargando...</p>;
   }
 
-  const canReview = currentUser.id !== user.id;
+  const canReview = currentUser && currentUser.id !== user.id;
 
   const reviews = user.reviews_received || [];
   const averageScore =
@@ -114,6 +112,28 @@ export default function PublicUserView() {
           >
               ⭐ Calificación promedio: {averageScore}
           </p>
+
+          {user.phone && (
+            <a
+              href={`https://wa.me/52${user.phone.replace(/\D/g, "")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn"
+              style={{
+                display: 'inline-block',
+                backgroundColor: '#25D366',
+                color: 'white',
+                marginTop: '15px',
+                fontSize: '16px',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                textDecoration: 'none',
+                fontWeight: 'bold'
+              }}
+            >
+              <span style={{ marginRight: '8px' }}>💬</span> Contactar por WhatsApp
+            </a>
+          )}
         </div>
 
         {canReview && (
@@ -342,7 +362,7 @@ export default function PublicUserView() {
             <ReportForm
               reportedId={user.id}
               onCreated={() => {
-                alert("Reporte enviado");
+                alert("¿Enviar reporte?");
                 setShowReportModal(false);
               }}
             />

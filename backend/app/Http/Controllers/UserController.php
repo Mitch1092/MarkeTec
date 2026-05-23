@@ -92,6 +92,9 @@ class UserController extends Controller
             'activa' => false,
         ]);
 
+        $user->posts()->update(['activa' => false]);
+        $user->reviewsWritten()->update(['activa' => false]);
+
         return response()->json([
             'message' => 'Usuario eliminado',
         ]);

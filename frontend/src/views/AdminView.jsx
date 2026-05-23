@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import client from "../api/client";
 
 import UserCard from "../components/UserCard";
-import ReviewCard from "../components/ReviewCard";
+import ReviewCardAdmin from "../components/ReviewCardAdmin";
 import ReportCard from "../components/ReportCard";
 import PostCard from "../components/PostCard";
 import ToggleAdmin from "../components/ToggleAdmin";
@@ -53,6 +53,7 @@ export default function AdminView() {
       if (!confirm("¿Desactivar este usuario?")) return;
       await client.delete(`/users/${id}`);
     } else {
+      if (!confirm("¿Reactivar este usuario?")) return;
       await client.patch(`/users/${id}/reactivate`, { activa: true });
     }
     setUsers(users.map((u) => (u.id === id ? { ...u, activa: !isActive } : u)));
@@ -63,6 +64,7 @@ export default function AdminView() {
       if (!confirm("¿Desactivar esta reseña?")) return;
       await client.delete(`/reviews/${id}`);
     } else {
+      if (!confirm("¿Reactivar esta reseña?")) return;
       await client.patch(`/reviews/${id}/reactivate`, { activa: true });
     }
     setReviews(reviews.map((r) => (r.id === id ? { ...r, activa: !isActive } : r)));
@@ -70,9 +72,10 @@ export default function AdminView() {
 
   const toggleReport = async (id, isActive) => {
     if (isActive) {
-      if (!confirm("¿Marcar este reporte como revisado (desactivar)?")) return;
+      if (!confirm("¿Marcar este reporte como revisado?")) return;
       await client.delete(`/reports/${id}`);
     } else {
+      if (!confirm("¿Marcar este reporte como no revisado?")) return;
       await client.patch(`/reports/${id}/reactivate`, { activa: true });
     }
     setReports(reports.map((r) => (r.id === id ? { ...r, activa: !isActive } : r)));
@@ -83,6 +86,7 @@ export default function AdminView() {
       if (!confirm("¿Desactivar este post?")) return;
       await client.delete(`/posts/${id}`);
     } else {
+      if (!confirm("¿Activar este post?")) return;
       await client.patch(`/posts/${id}/reactivate`, { activa: true });
     }
     setPosts(posts.map((p) => (p.id === id ? { ...p, activa: !isActive } : p)));
@@ -171,7 +175,7 @@ export default function AdminView() {
         <div style={{ display: "grid", gap: "20px" }}>
           {reviews.filter(r => showActive ? r.activa : !r.activa).map((review) => (
             <div key={review.id} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              <ReviewCard review={review} />
+              <ReviewCardAdmin review={review} />
 
               <button
                 onClick={() => toggleReview(review.id, review.activa)}
@@ -195,7 +199,7 @@ export default function AdminView() {
                 onClick={() => toggleReport(report.id, report.activa)}
                 style={{ background: report.activa ? "#dc2626" : "#16a34a", color: "white", padding: "10px", borderRadius: "8px", border: "none", cursor: "pointer" }}
               >
-                {report.activa ? "Marcar como revisado (Desactivar)" : "Reactivar reporte"}
+                {report.activa ? "Marcar como revisado" : "Reactivar reporte"}
               </button>
             </div>
           ))}

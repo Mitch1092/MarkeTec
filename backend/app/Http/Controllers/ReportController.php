@@ -12,8 +12,11 @@ class ReportController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(\Illuminate\Http\Request $request)
     {
+        if ($request->user() && $request->user()->admin) {
+            return Report::withoutGlobalScope('activa')->with(['images', 'reporter', 'reported'])->get();
+        }
         return Report::with(['images', 'reporter', 'reported'])->get();
     }
 
@@ -50,24 +53,26 @@ class ReportController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Report $report)
+    public function show($id)
     {
+        $report = Report::withoutGlobalScope('activa')->findOrFail($id);
         return response()->json(
-            $report->load(['user', 'images'])
+            $report->load(['reporter', 'reported', 'images'])
         );
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateReportRequest $request, Report $report)
+    public function update(UpdateReportRequest $request, $id)
     {
-         $request->validate([
+        $report = Report::withoutGlobalScope('activa')->findOrFail($id);
+        
+        $request->validate([
             'description' => 'required|string',
         ]);
 
         $data = $request->all();
-
 
         $report->update($data);
 
@@ -77,8 +82,10 @@ class ReportController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Report $report)
+    public function destroy($id)
     {
+        $report = Report::withoutGlobalScope('activa')->findOrFail($id);
+        
         $report->update([
             'activa' => false,
         ]);
@@ -88,8 +95,10 @@ class ReportController extends Controller
         ], 200);
     }
 
-    public function reactivate(Report $report)
+    public function reactivate(\Illuminate\Http\Request $request, $id)
     {
+        $report = Report::withoutGlobalScope('activa')->findOrFail($id);
+        
         $report->update([
             'activa' => true,
         ]);
